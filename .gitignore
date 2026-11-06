@@ -1,0 +1,19 @@
+# Ignore compiled C executable files
+*.exe
+
+# Ignore object files
+*.o
+
+# Ignore output files
+*.out
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore Windows system files
+Thumbs.db
+Desktop.ini

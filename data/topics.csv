@@ -1,0 +1,9 @@
+topic_id,topic_name,difficulty,required_hours
+1,Searching,2,1
+2,Sorting,3,2
+3,Greedy Algorithm,3,2
+4,Dynamic Programming,5,4
+5,Graph Basics,4,3
+6,Dijkstra Algorithm,4,3
+7,Minimum Spanning Tree,4,3
+8,String Matching,3,2
