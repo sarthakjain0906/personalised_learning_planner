@@ -4,15 +4,16 @@
 
 #define MAX_TOPICS 20
 #define MAX_HOURS 100
+#define INF 99999
 
 /* ================= COLORS ================= */
 
-#define RESET   "\033[0m"
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define YELLOW  "\033[33m"
-#define CYAN    "\033[36m"
-#define BOLD    "\033[1m"
+#define RESET  "\033[0m"
+#define RED    "\033[31m"
+#define GREEN  "\033[32m"
+#define YELLOW "\033[33m"
+#define CYAN   "\033[36m"
+#define BOLD   "\033[1m"
 
 /* ================= STRUCTURES ================= */
 
@@ -20,6 +21,7 @@ typedef struct
 {
     int id;
     char name[50];
+
     int difficulty;
     int requiredHours;
 
@@ -42,17 +44,19 @@ typedef struct
 /* ================= GLOBAL DATA ================= */
 
 Topic topics[MAX_TOPICS];
-
 Student student;
 
 int topicCount = 8;
-
-int graph[MAX_TOPICS][MAX_TOPICS] = {0};
-
 int assessmentTaken = 0;
 
+/*
+   graph[i][j] = learning cost from topic i to topic j
+   0 means no direct connection.
+*/
+int graph[MAX_TOPICS][MAX_TOPICS] = {0};
+
 /* ============================================================
-   UI FUNCTIONS
+   BASIC UI
    ============================================================ */
 
 void clearScreen()
@@ -68,17 +72,9 @@ void waitForEnter()
 {
     int c;
 
-    printf(
-        "\n" CYAN
-        "Press ENTER to continue..."
-        RESET
-    );
+    printf("\n" CYAN "Press ENTER to continue..." RESET);
 
-    while (
-        (c = getchar()) != '\n'
-        &&
-        c != EOF
-    )
+    while ((c = getchar()) != '\n' && c != EOF)
     {
     }
 
@@ -87,11 +83,9 @@ void waitForEnter()
 
 void printLine()
 {
-    printf(
-        CYAN
-        "======================================================================\n"
-        RESET
-    );
+    printf(CYAN
+           "======================================================================\n"
+           RESET);
 }
 
 void printHeader(const char title[])
@@ -100,12 +94,10 @@ void printHeader(const char title[])
 
     printLine();
 
-    printf(
-        BOLD CYAN
-        "                 %s\n"
-        RESET,
-        title
-    );
+    printf(BOLD CYAN
+           "                 %s\n"
+           RESET,
+           title);
 
     printLine();
 }
@@ -132,22 +124,8 @@ void progressBar(int score)
 }
 
 /* ============================================================
-   KNOWLEDGE LEVEL
+   STATUS
    ============================================================ */
-
-const char *getLevel(int score)
-{
-    if (score >= 80)
-        return "STRONG";
-
-    if (score >= 60)
-        return "GOOD";
-
-    if (score >= 40)
-        return "WEAK";
-
-    return "VERY WEAK";
-}
 
 void printStatus(int score)
 {
@@ -204,27 +182,26 @@ void initializeGraph()
     /*
        Searching -> Sorting
        Sorting -> Greedy
-       Greedy -> Dynamic Programming
+       Greedy -> DP
        DP -> Graph Basics
        Graph Basics -> Dijkstra
        Graph Basics -> MST
+       Sorting -> String Matching
+
+       Weight represents learning effort.
     */
 
-    graph[0][1] = 1;
-
-    graph[1][2] = 1;
-
-    graph[2][3] = 1;
-
-    graph[3][4] = 1;
-
-    graph[4][5] = 1;
-
-    graph[4][6] = 1;
+    graph[0][1] = 2;
+    graph[1][2] = 3;
+    graph[2][3] = 4;
+    graph[3][4] = 4;
+    graph[4][5] = 3;
+    graph[4][6] = 3;
+    graph[1][7] = 2;
 }
 
 /* ============================================================
-   BASIC FUNCTIONS
+   FIND TOPIC
    ============================================================ */
 
 int findTopicIndex(int id)
@@ -238,11 +215,6 @@ int findTopicIndex(int id)
     return -1;
 }
 
-int maxValue(int a, int b)
-{
-    return (a > b) ? a : b;
-}
-
 /* ============================================================
    PRIORITY CALCULATION
    ============================================================ */
@@ -251,15 +223,18 @@ void calculatePriority()
 {
     for (int i = 0; i < topicCount; i++)
     {
-        int weakness =
-            100 - topics[i].score;
+        int weakness = 100 - topics[i].score;
 
         int difficultyScore =
             topics[i].difficulty * 20;
 
+        /*
+           Weak topics get more priority.
+           Difficult topics also receive more priority.
+        */
+
         topics[i].priority =
-            0.6f * weakness
-            +
+            0.6f * weakness +
             0.4f * difficultyScore;
 
         topics[i].completed =
@@ -273,60 +248,30 @@ void calculatePriority()
 
 void enterStudentDetails()
 {
-    printHeader(
-        "STUDENT PROFILE"
-    );
+    printHeader("STUDENT PROFILE");
 
-    printf(
-        "\nStudent Name          : "
-    );
-
-    scanf(
-        " %49[^\n]",
-        student.name
-    );
+    printf("\nStudent Name          : ");
+    scanf(" %49[^\n]", student.name);
 
     do
     {
-        printf(
-            "Available Study Hours : "
-        );
+        printf("Available Study Hours : ");
+        scanf("%d", &student.availableHours);
 
-        scanf(
-            "%d",
-            &student.availableHours
-        );
-
-    }
-    while (
-        student.availableHours <= 0
-        ||
-        student.availableHours > MAX_HOURS
-    );
+    } while (student.availableHours <= 0 ||
+             student.availableHours > MAX_HOURS);
 
     do
     {
-        printf(
-            "Target Score          : "
-        );
+        printf("Target Score          : ");
+        scanf("%d", &student.targetScore);
 
-        scanf(
-            "%d",
-            &student.targetScore
-        );
+    } while (student.targetScore < 0 ||
+             student.targetScore > 100);
 
-    }
-    while (
-        student.targetScore < 0
-        ||
-        student.targetScore > 100
-    );
-
-    printf(
-        "\n" GREEN
-        "Profile Created Successfully!"
-        RESET "\n"
-    );
+    printf("\n" GREEN
+           "Profile Created Successfully!\n"
+           RESET);
 
     waitForEnter();
 }
@@ -337,83 +282,56 @@ void enterStudentDetails()
 
 void displayTopics()
 {
-    printHeader(
-        "COURSE TOPICS"
-    );
+    printHeader("COURSE TOPICS");
 
-    printf(
-        "\n%-5s %-28s %-12s %-10s\n",
-        "ID",
-        "TOPIC",
-        "DIFFICULTY",
-        "HOURS"
-    );
+    printf("\n%-5s %-28s %-12s %-10s\n",
+           "ID",
+           "TOPIC",
+           "DIFFICULTY",
+           "HOURS");
 
-    printf(
-        "--------------------------------------------------------------------\n"
-    );
+    printf("--------------------------------------------------------------------\n");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "%-5d %-28s %-12d %-10d\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].difficulty,
-            topics[i].requiredHours
-        );
+        printf("%-5d %-28s %-12d %-10d\n",
+               topics[i].id,
+               topics[i].name,
+               topics[i].difficulty,
+               topics[i].requiredHours);
     }
 
     waitForEnter();
 }
 
 /* ============================================================
-   PART 1 - ASSESSMENT
+   ASSESSMENT
    ============================================================ */
 
 void takeAssessment()
 {
-    printHeader(
-        "STUDENT ASSESSMENT"
-    );
+    printHeader("STUDENT ASSESSMENT");
 
-    printf(
-        "\nEnter score from 0 to 100 for each topic.\n\n"
-    );
+    printf("\nEnter score from 0 to 100 for each topic.\n\n");
 
     for (int i = 0; i < topicCount; i++)
     {
         do
         {
-            printf(
-                "%-28s : ",
-                topics[i].name
-            );
+            printf("%-28s : ", topics[i].name);
 
-            scanf(
-                "%d",
-                &topics[i].score
-            );
+            scanf("%d", &topics[i].score);
 
-            if (
-                topics[i].score < 0
-                ||
-                topics[i].score > 100
-            )
+            if (topics[i].score < 0 ||
+                topics[i].score > 100)
             {
-                printf(
-                    RED
-                    "Invalid score. Use 0-100.\n"
-                    RESET
-                );
+                printf(RED
+                       "Invalid score. Use 0-100.\n"
+                       RESET);
             }
 
-        }
-        while (
-            topics[i].score < 0
-            ||
-            topics[i].score > 100
-        );
+        } while (topics[i].score < 0 ||
+                 topics[i].score > 100);
 
         topics[i].previousScore =
             topics[i].score;
@@ -423,11 +341,9 @@ void takeAssessment()
 
     calculatePriority();
 
-    printf(
-        "\n" GREEN
-        "Assessment Completed Successfully!"
-        RESET "\n"
-    );
+    printf("\n" GREEN
+           "Assessment Completed Successfully!\n"
+           RESET);
 
     waitForEnter();
 }
@@ -438,37 +354,23 @@ void takeAssessment()
 
 void assessmentDashboard()
 {
-    printHeader(
-        "STUDENT ANALYSIS"
-    );
+    printHeader("STUDENT ANALYSIS");
 
-    printf(
-        "\nStudent      : "
-        BOLD "%s" RESET "\n",
-        student.name
-    );
+    printf("\nStudent      : " BOLD "%s" RESET "\n",
+           student.name);
 
-    printf(
-        "Target Score : %d%%\n\n",
-        student.targetScore
-    );
+    printf("Target Score : %d%%\n\n",
+           student.targetScore);
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "%-25s ",
-            topics[i].name
-        );
+        printf("%-25s ", topics[i].name);
 
-        progressBar(
-            topics[i].score
-        );
+        progressBar(topics[i].score);
 
         printf("  ");
 
-        printStatus(
-            topics[i].score
-        );
+        printStatus(topics[i].score);
 
         printf("\n");
     }
@@ -482,214 +384,154 @@ void assessmentDashboard()
 
 void weakStrongAnalysis()
 {
-    printHeader(
-        "WEAK / STRONG ANALYSIS"
-    );
+    printHeader("WEAK / STRONG ANALYSIS");
 
-    int found;
-
-    printf(
-        GREEN
-        "\nSTRONG TOPICS\n"
-        RESET
-    );
-
-    found = 0;
+    printf(GREEN "\nSTRONG TOPICS\n" RESET);
 
     for (int i = 0; i < topicCount; i++)
     {
         if (topics[i].score >= 80)
         {
-            printf(
-                "  %-28s %d%%\n",
-                topics[i].name,
-                topics[i].score
-            );
-
-            found = 1;
+            printf("  %-28s %d%%\n",
+                   topics[i].name,
+                   topics[i].score);
         }
     }
 
-    if (!found)
-        printf("  None\n");
-
-
-    printf(
-        CYAN
-        "\nGOOD TOPICS\n"
-        RESET
-    );
-
-    found = 0;
+    printf(YELLOW "\nTOPICS NEEDING IMPROVEMENT\n" RESET);
 
     for (int i = 0; i < topicCount; i++)
     {
-        if (
-            topics[i].score >= 60
-            &&
-            topics[i].score < 80
-        )
+        if (topics[i].score < 80)
         {
-            printf(
-                "  %-28s %d%%\n",
-                topics[i].name,
-                topics[i].score
-            );
+            printf("  %-28s %d%%  ",
+                   topics[i].name,
+                   topics[i].score);
 
-            found = 1;
+            printStatus(topics[i].score);
+
+            printf("\n");
         }
     }
-
-    if (!found)
-        printf("  None\n");
-
-
-    printf(
-        YELLOW
-        "\nWEAK TOPICS\n"
-        RESET
-    );
-
-    found = 0;
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        if (
-            topics[i].score >= 40
-            &&
-            topics[i].score < 60
-        )
-        {
-            printf(
-                "  %-28s %d%%\n",
-                topics[i].name,
-                topics[i].score
-            );
-
-            found = 1;
-        }
-    }
-
-    if (!found)
-        printf("  None\n");
-
-
-    printf(
-        RED
-        "\nVERY WEAK TOPICS\n"
-        RESET
-    );
-
-    found = 0;
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        if (topics[i].score < 40)
-        {
-            printf(
-                "  %-28s %d%%\n",
-                topics[i].name,
-                topics[i].score
-            );
-
-            found = 1;
-        }
-    }
-
-    if (!found)
-        printf("  None\n");
 
     waitForEnter();
 }
 
 /* ============================================================
-   PRIORITY ANALYSIS
+   ALGORITHM 1
+   MERGE SORT FOR PRIORITY RANKING
    ============================================================ */
 
-void displayPriorities()
+void mergeTopics(Topic arr[],
+                 int left,
+                 int mid,
+                 int right)
+{
+    Topic temp[MAX_TOPICS];
+
+    int i = left;
+    int j = mid + 1;
+    int k = 0;
+
+    while (i <= mid && j <= right)
+    {
+        /*
+           Higher priority should appear first.
+        */
+
+        if (arr[i].priority >= arr[j].priority)
+        {
+            temp[k++] = arr[i++];
+        }
+        else
+        {
+            temp[k++] = arr[j++];
+        }
+    }
+
+    while (i <= mid)
+        temp[k++] = arr[i++];
+
+    while (j <= right)
+        temp[k++] = arr[j++];
+
+    for (i = left, k = 0;
+         i <= right;
+         i++, k++)
+    {
+        arr[i] = temp[k];
+    }
+}
+
+void mergeSortTopics(Topic arr[],
+                     int left,
+                     int right)
+{
+    if (left < right)
+    {
+        int mid =
+            left + (right - left) / 2;
+
+        mergeSortTopics(arr,
+                        left,
+                        mid);
+
+        mergeSortTopics(arr,
+                        mid + 1,
+                        right);
+
+        mergeTopics(arr,
+                    left,
+                    mid,
+                    right);
+    }
+}
+
+void priorityRanking()
 {
     calculatePriority();
 
-    printHeader(
-        "TOPIC PRIORITY ANALYSIS"
-    );
+    Topic sorted[MAX_TOPICS];
 
-    printf(
-        "\n%-28s %-8s %-10s %-12s\n",
-        "TOPIC",
-        "SCORE",
-        "PRIORITY",
-        "STATUS"
-    );
+    for (int i = 0; i < topicCount; i++)
+        sorted[i] = topics[i];
 
-    printf(
-        "--------------------------------------------------------------------\n"
-    );
+    mergeSortTopics(sorted,
+                    0,
+                    topicCount - 1);
+
+    printHeader("TOPIC PRIORITY RANKING - MERGE SORT");
+
+    printf("\n%-6s %-28s %-10s %-12s\n",
+           "RANK",
+           "TOPIC",
+           "SCORE",
+           "PRIORITY");
+
+    printf("--------------------------------------------------------------------\n");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "%-28s %-8d %-10.2f ",
-            topics[i].name,
-            topics[i].score,
-            topics[i].priority
-        );
-
-        if (topics[i].completed)
-        {
-            printf(
-                GREEN
-                "MASTERED"
-                RESET
-            );
-        }
-
-        else if (
-            topics[i].priority >= 70
-        )
-        {
-            printf(
-                RED
-                "HIGH"
-                RESET
-            );
-        }
-
-        else if (
-            topics[i].priority >= 50
-        )
-        {
-            printf(
-                YELLOW
-                "MEDIUM"
-                RESET
-            );
-        }
-
-        else
-        {
-            printf(
-                CYAN
-                "LOW"
-                RESET
-            );
-        }
-
-        printf("\n");
+        printf("%-6d %-28s %-10d %-12.2f\n",
+               i + 1,
+               sorted[i].name,
+               sorted[i].score,
+               sorted[i].priority);
     }
+
+    printf("\nAlgorithm Used : Merge Sort\n");
+    printf("Time Complexity: O(n log n)\n");
 
     waitForEnter();
 }
 
 /* ============================================================
-   PREREQUISITE GRAPH
+   DISPLAY PREREQUISITE GRAPH
    ============================================================ */
 
 void displayPrerequisiteGraph()
 {
-    printHeader(
-        "PREREQUISITE KNOWLEDGE GRAPH"
-    );
+    printHeader("PREREQUISITE KNOWLEDGE GRAPH");
 
     printf("\n");
 
@@ -697,20 +539,17 @@ void displayPrerequisiteGraph()
     {
         for (int j = 0; j < topicCount; j++)
         {
-            if (graph[i][j])
+            if (graph[i][j] != 0)
             {
-                printf(
-                    "%-28s ---> %s\n",
-                    topics[i].name,
-                    topics[j].name
-                );
+                printf("%-28s ---> %-28s Cost: %d\n",
+                       topics[i].name,
+                       topics[j].name,
+                       graph[i][j]);
             }
         }
     }
 
-    printf(
-        "\nA ---> B means A should be understood before B.\n"
-    );
+    printf("\nA ---> B means A should be understood before B.\n");
 
     waitForEnter();
 }
@@ -719,214 +558,237 @@ void displayPrerequisiteGraph()
    DEPENDENCY CHECK
    ============================================================ */
 
-void checkDependencies(
-    int target,
-    int visited[],
-    int *risk)
+void checkDependencies(int target,
+                       int visited[])
 {
     for (int i = 0; i < topicCount; i++)
     {
-        if (
-            graph[i][target]
-            &&
-            !visited[i]
-        )
+        if (graph[i][target] != 0 &&
+            !visited[i])
         {
             visited[i] = 1;
 
-            checkDependencies(
-                i,
-                visited,
-                risk
-            );
+            checkDependencies(i,
+                              visited);
 
-            printf(
-                "%-28s %3d%%  ",
-                topics[i].name,
-                topics[i].score
-            );
+            printf("%-28s %3d%%  ",
+                   topics[i].name,
+                   topics[i].score);
 
-            if (
-                topics[i].score < 40
-            )
-            {
-                printf(
-                    RED
-                    "HIGH RISK"
-                    RESET
-                    "\n"
-                );
+            printStatus(topics[i].score);
 
-                if (*risk < 2)
-                    *risk = 2;
-            }
-
-            else if (
-                topics[i].score < 60
-            )
-            {
-                printf(
-                    YELLOW
-                    "MEDIUM RISK"
-                    RESET
-                    "\n"
-                );
-
-                if (*risk < 1)
-                    *risk = 1;
-            }
-
-            else
-            {
-                printf(
-                    GREEN
-                    "SAFE"
-                    RESET
-                    "\n"
-                );
-            }
+            printf("\n");
         }
     }
 }
 
-/* ============================================================
-   DEPENDENCY RISK DETECTOR
-   ============================================================ */
-
 void dependencyRiskDetector()
 {
-    printHeader(
-        "DEPENDENCY RISK DETECTOR"
-    );
+    printHeader("DEPENDENCY RISK DETECTOR");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "[%d] %-28s %d%%\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].score
-        );
+        printf("[%d] %-28s %d%%\n",
+               topics[i].id,
+               topics[i].name,
+               topics[i].score);
     }
 
     int id;
 
-    printf(
-        "\nSelect Target Topic ID: "
-    );
+    printf("\nSelect Target Topic ID: ");
+    scanf("%d", &id);
 
-    scanf(
-        "%d",
-        &id
-    );
-
-    int target =
-        findTopicIndex(id);
+    int target = findTopicIndex(id);
 
     if (target == -1)
     {
-        printf(
-            RED
-            "\nInvalid Topic ID.\n"
-            RESET
-        );
+        printf(RED "\nInvalid Topic ID.\n" RESET);
 
         waitForEnter();
+        return;
+    }
+
+    int visited[MAX_TOPICS] = {0};
+
+    printf("\nPrerequisites for %s:\n\n",
+           topics[target].name);
+
+    checkDependencies(target,
+                      visited);
+
+    waitForEnter();
+}
+
+/* ============================================================
+   ALGORITHM 2
+   DIJKSTRA SHORTEST LEARNING ROUTE
+   ============================================================ */
+
+int minimumDistance(int distance[],
+                    int visited[])
+{
+    int minimum = INF;
+    int index = -1;
+
+    for (int i = 0; i < topicCount; i++)
+    {
+        if (!visited[i] &&
+            distance[i] < minimum)
+        {
+            minimum = distance[i];
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+void printDijkstraPath(int parent[],
+                       int target)
+{
+    if (parent[target] == -1)
+    {
+        printf("%s",
+               topics[target].name);
 
         return;
     }
 
-    int visited[MAX_TOPICS] =
-        {0};
+    printDijkstraPath(parent,
+                      parent[target]);
 
-    int risk = 0;
+    printf(" -> %s",
+           topics[target].name);
+}
 
-    printf(
-        "\nTarget: "
-        BOLD "%s" RESET "\n\n",
-        topics[target].name
-    );
+void shortestLearningRoute()
+{
+    printHeader("SHORTEST LEARNING ROUTE - DIJKSTRA");
 
-    printf(
-        "Prerequisite Analysis:\n\n"
-    );
+    printf("\nAvailable Topics:\n\n");
 
-    checkDependencies(
-        target,
-        visited,
-        &risk
-    );
-
-    printf(
-        "\n--------------------------------------------------------------------\n"
-    );
-
-    if (risk == 2)
+    for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            RED
-            "OVERALL DEPENDENCY RISK: HIGH\n"
-            RESET
-        );
-
-        printf(
-            "Complete weak prerequisites first.\n"
-        );
+        printf("[%d] %s\n",
+               topics[i].id,
+               topics[i].name);
     }
 
-    else if (risk == 1)
-    {
-        printf(
-            YELLOW
-            "OVERALL DEPENDENCY RISK: MEDIUM\n"
-            RESET
-        );
+    int startID;
+    int targetID;
 
-        printf(
-            "Revise prerequisites before continuing.\n"
-        );
+    printf("\nStarting Topic ID : ");
+    scanf("%d", &startID);
+
+    printf("Target Topic ID   : ");
+    scanf("%d", &targetID);
+
+    int start =
+        findTopicIndex(startID);
+
+    int target =
+        findTopicIndex(targetID);
+
+    if (start == -1 || target == -1)
+    {
+        printf(RED
+               "\nInvalid Topic ID.\n"
+               RESET);
+
+        waitForEnter();
+        return;
     }
 
+    int distance[MAX_TOPICS];
+    int visited[MAX_TOPICS] = {0};
+    int parent[MAX_TOPICS];
+
+    for (int i = 0; i < topicCount; i++)
+    {
+        distance[i] = INF;
+        parent[i] = -1;
+    }
+
+    distance[start] = 0;
+
+    for (int count = 0;
+         count < topicCount - 1;
+         count++)
+    {
+        int u =
+            minimumDistance(distance,
+                            visited);
+
+        if (u == -1)
+            break;
+
+        visited[u] = 1;
+
+        for (int v = 0;
+             v < topicCount;
+             v++)
+        {
+            if (!visited[v] &&
+                graph[u][v] != 0 &&
+                distance[u] != INF &&
+                distance[u] + graph[u][v] <
+                    distance[v])
+            {
+                distance[v] =
+                    distance[u] +
+                    graph[u][v];
+
+                parent[v] = u;
+            }
+        }
+    }
+
+    printf("\n");
+
+    if (distance[target] == INF)
+    {
+        printf(RED
+               "No learning route exists between these topics.\n"
+               RESET);
+    }
     else
     {
-        printf(
-            GREEN
-            "OVERALL DEPENDENCY RISK: LOW\n"
-            RESET
-        );
+        printf(GREEN
+               "Recommended Learning Route:\n\n"
+               RESET);
 
-        printf(
-            "You can proceed with the topic.\n"
-        );
+        printDijkstraPath(parent,
+                          target);
+
+        printf("\n\nTotal Learning Cost : %d\n",
+               distance[target]);
+
+        printf("Algorithm Used      : Dijkstra\n");
+        printf("Complexity          : O(V^2)\n");
     }
 
     waitForEnter();
 }
 
 /* ============================================================
-   PART 2 - LEARNING PATH
+   PERSONALIZED LEARNING PATH
    ============================================================ */
 
-void buildLearningPath(
-    int target,
-    int visited[],
-    int path[],
-    int *count)
+void buildLearningPath(int target,
+                       int visited[],
+                       int path[],
+                       int *count)
 {
     for (int i = 0; i < topicCount; i++)
     {
-        if (
-            graph[i][target]
-            &&
-            !visited[i]
-        )
+        if (graph[i][target] != 0 &&
+            !visited[i])
         {
-            buildLearningPath(
-                i,
-                visited,
-                path,
-                count
-            );
+            buildLearningPath(i,
+                              visited,
+                              path,
+                              count);
         }
     }
 
@@ -934,135 +796,88 @@ void buildLearningPath(
     {
         visited[target] = 1;
 
-        if (
-            !topics[target].completed
-        )
+        if (!topics[target].completed)
         {
-            path[*count] =
-                target;
-
+            path[*count] = target;
             (*count)++;
         }
     }
 }
 
-/* ============================================================
-   PERSONALIZED LEARNING PATH
-   ============================================================ */
-
 void personalizedLearningPath()
 {
     calculatePriority();
 
-    printHeader(
-        "PERSONALIZED LEARNING PATH"
-    );
+    printHeader("PERSONALIZED LEARNING PATH");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "[%d] %-28s %d%%\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].score
-        );
+        printf("[%d] %-28s %d%%\n",
+               topics[i].id,
+               topics[i].name,
+               topics[i].score);
     }
 
     int id;
 
-    printf(
-        "\nSelect Final Target Topic: "
-    );
-
-    scanf(
-        "%d",
-        &id
-    );
+    printf("\nSelect Final Target Topic: ");
+    scanf("%d", &id);
 
     int target =
         findTopicIndex(id);
 
     if (target == -1)
     {
-        printf(
-            RED
-            "\nInvalid Topic.\n"
-            RESET
-        );
+        printf(RED
+               "\nInvalid Topic.\n"
+               RESET);
 
         waitForEnter();
-
         return;
     }
 
-    int visited[MAX_TOPICS] =
-        {0};
-
+    int visited[MAX_TOPICS] = {0};
     int path[MAX_TOPICS];
 
     int count = 0;
 
-    buildLearningPath(
-        target,
-        visited,
-        path,
-        &count
-    );
+    buildLearningPath(target,
+                      visited,
+                      path,
+                      &count);
 
-    printHeader(
-        "YOUR PERSONALIZED LEARNING PATH"
-    );
+    printHeader("YOUR PERSONALIZED LEARNING PATH");
 
-    printf(
-        "\nStudent : %s\n",
-        student.name
-    );
+    printf("\nStudent : %s\n",
+           student.name);
 
-    printf(
-        "Target  : %s\n\n",
-        topics[target].name
-    );
+    printf("Target  : %s\n\n",
+           topics[target].name);
 
     if (count == 0)
     {
-        printf(
-            GREEN
-            "Target and prerequisites are already mastered.\n"
-            RESET
-        );
+        printf(GREEN
+               "Target and prerequisites are already mastered.\n"
+               RESET);
     }
-
     else
     {
         for (int i = 0; i < count; i++)
         {
-            int index =
-                path[i];
+            int index = path[i];
 
-            printf(
-                "%d. "
-                BOLD "%s" RESET,
-                i + 1,
-                topics[index].name
-            );
+            printf("%d. " BOLD "%s" RESET,
+                   i + 1,
+                   topics[index].name);
 
-            printf(
-                "  Score: %d%%  Priority: %.2f\n",
-                topics[index].score,
-                topics[index].priority
-            );
+            printf(" | Score: %d%% | Priority: %.2f\n",
+                   topics[index].score,
+                   topics[index].priority);
 
-            if (
-                i < count - 1
-            )
+            if (i < count - 1)
             {
-                printf(
-                    "        |\n"
-                );
-
-                printf(
-                    "        v\n"
-                );
+                printf("        |\n");
+                printf("        v\n");
             }
         }
     }
@@ -1071,100 +886,80 @@ void personalizedLearningPath()
 }
 
 /* ============================================================
+   ALGORITHM 3
    0/1 KNAPSACK STUDY OPTIMIZER
    ============================================================ */
 
-void generateKnapsackPlan(
-    int availableHours)
+int maxValue(int a,
+             int b)
+{
+    return (a > b) ? a : b;
+}
+
+void optimizedStudyPlan()
 {
     calculatePriority();
 
-    if (
-        availableHours <= 0
-        ||
-        availableHours > MAX_HOURS
-    )
-    {
-        printf(
-            RED
-            "\nInvalid study hours.\n"
-            RESET
-        );
+    printHeader("OPTIMIZED STUDY PLAN - 0/1 KNAPSACK");
 
-        return;
-    }
-
-    Topic candidates[MAX_TOPICS];
-
+    int candidates[MAX_TOPICS];
     int candidateCount = 0;
 
     for (int i = 0; i < topicCount; i++)
     {
-        if (
-            !topics[i].completed
-        )
+        if (!topics[i].completed)
         {
-            candidates[candidateCount++] =
-                topics[i];
+            candidates[candidateCount++] = i;
         }
     }
 
     if (candidateCount == 0)
     {
-        printf(
-            GREEN
-            "\nAll topics are mastered.\n"
-            RESET
-        );
+        printf(GREEN
+               "\nAll topics are already mastered!\n"
+               RESET);
 
+        waitForEnter();
         return;
     }
+
+    int hours =
+        student.availableHours;
 
     int dp[MAX_TOPICS + 1]
           [MAX_HOURS + 1];
 
-    memset(
-        dp,
-        0,
-        sizeof(dp)
-    );
+    memset(dp,
+           0,
+           sizeof(dp));
 
-    for (
-        int i = 1;
-        i <= candidateCount;
-        i++
-    )
+    for (int i = 1;
+         i <= candidateCount;
+         i++)
     {
-        for (
-            int h = 0;
-            h <= availableHours;
-            h++
-        )
+        int topicIndex =
+            candidates[i - 1];
+
+        int required =
+            topics[topicIndex].requiredHours;
+
+        int value =
+            (int)topics[topicIndex].priority;
+
+        for (int h = 0;
+             h <= hours;
+             h++)
         {
-            int hours =
-                candidates[i - 1]
-                    .requiredHours;
-
-            int value =
-                (int)
-                candidates[i - 1]
-                    .priority;
-
-            if (
-                hours <= h
-            )
+            if (required <= h)
             {
                 dp[i][h] =
                     maxValue(
                         dp[i - 1][h],
 
-                        value
-                        +
+                        value +
                         dp[i - 1]
-                          [h - hours]
-                    );
+                          [h - required]);
             }
-
             else
             {
                 dp[i][h] =
@@ -1174,467 +969,198 @@ void generateKnapsackPlan(
     }
 
     int selected[MAX_TOPICS];
-
     int selectedCount = 0;
 
-    int value =
-        dp[candidateCount]
-          [availableHours];
+    int h = hours;
 
-    int hoursLeft =
-        availableHours;
-
-    for (
-        int i = candidateCount;
-        i > 0 && value > 0;
-        i--
-    )
+    for (int i = candidateCount;
+         i > 0;
+         i--)
     {
-        if (
-            value !=
-            dp[i - 1][hoursLeft]
-        )
+        if (dp[i][h] !=
+            dp[i - 1][h])
         {
+            int topicIndex =
+                candidates[i - 1];
+
             selected[selectedCount++] =
-                i - 1;
+                topicIndex;
 
-            value -=
-                (int)
-                candidates[i - 1]
-                    .priority;
-
-            hoursLeft -=
-                candidates[i - 1]
+            h -=
+                topics[topicIndex]
                     .requiredHours;
         }
     }
 
-    printf(
-        "\nAvailable Time : %d Hours\n",
-        availableHours
-    );
+    printf("\nAvailable Study Time : %d Hours\n\n",
+           hours);
 
-    printf(
-        "Learning Value : %d\n\n",
-        dp[candidateCount]
-          [availableHours]
-    );
+    printf("%-28s %-10s %-12s\n",
+           "TOPIC",
+           "HOURS",
+           "PRIORITY");
 
-    printf(
-        "%-28s %-10s %-12s\n",
-        "TOPIC",
-        "HOURS",
-        "PRIORITY"
-    );
-
-    printf(
-        "--------------------------------------------------------------------\n"
-    );
+    printf("--------------------------------------------------------------------\n");
 
     int usedHours = 0;
 
-    for (
-        int i = selectedCount - 1;
-        i >= 0;
-        i--
-    )
+    for (int i = selectedCount - 1;
+         i >= 0;
+         i--)
     {
         int index =
             selected[i];
 
-        printf(
-            "%-28s %-10d %-12.2f\n",
-            candidates[index].name,
-            candidates[index].requiredHours,
-            candidates[index].priority
-        );
+        printf("%-28s %-10d %-12.2f\n",
+               topics[index].name,
+               topics[index].requiredHours,
+               topics[index].priority);
 
         usedHours +=
-            candidates[index]
-                .requiredHours;
+            topics[index].requiredHours;
     }
 
-    printf(
-        "--------------------------------------------------------------------\n"
-    );
+    printf("--------------------------------------------------------------------\n");
 
-    printf(
-        "Topics Selected : %d\n",
-        selectedCount
-    );
+    printf("Hours Used      : %d/%d\n",
+           usedHours,
+           hours);
 
-    printf(
-        "Hours Used      : %d/%d\n",
-        usedHours,
-        availableHours
-    );
+    printf("Unused Hours    : %d\n",
+           hours - usedHours);
 
-    printf(
-        "Unused Hours    : %d\n",
-        availableHours -
-        usedHours
-    );
-}
+    printf("Learning Value  : %d\n",
+           dp[candidateCount][hours]);
 
-/* ============================================================
-   OPTIMIZED STUDY PLAN
-   ============================================================ */
+    printf("\nAlgorithm Used  : 0/1 Knapsack\n");
 
-void optimizedStudyPlan()
-{
-    printHeader(
-        "OPTIMIZED STUDY PLAN"
-    );
-
-    generateKnapsackPlan(
-        student.availableHours
-    );
+    printf("Time Complexity : O(n * H)\n");
 
     waitForEnter();
 }
 
 /* ============================================================
-   EXPLAINABLE RECOMMENDATION
+   NEXT RECOMMENDED TOPIC
    ============================================================ */
 
-void explainRecommendation()
+int prerequisitesReady(int target)
 {
-    calculatePriority();
-
-    printHeader(
-        "EXPLAINABLE RECOMMENDATION"
-    );
-
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "[%d] %-28s %d%%\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].score
-        );
-    }
-
-    int id;
-
-    printf(
-        "\nSelect Topic ID: "
-    );
-
-    scanf(
-        "%d",
-        &id
-    );
-
-    int index =
-        findTopicIndex(id);
-
-    if (index == -1)
-    {
-        printf(
-            RED
-            "\nInvalid Topic.\n"
-            RESET
-        );
-
-        waitForEnter();
-
-        return;
-    }
-
-    printHeader(
-        "WHY THIS TOPIC?"
-    );
-
-    printf(
-        "\nTopic           : "
-        BOLD "%s" RESET "\n",
-        topics[index].name
-    );
-
-    printf(
-        "Current Score   : %d%%\n",
-        topics[index].score
-    );
-
-    printf(
-        "Knowledge Level : "
-    );
-
-    printStatus(
-        topics[index].score
-    );
-
-    printf(
-        "\nDifficulty      : %d/5\n",
-        topics[index].difficulty
-    );
-
-    printf(
-        "Required Time   : %d Hours\n",
-        topics[index].requiredHours
-    );
-
-    printf(
-        "Priority Score  : %.2f\n\n",
-        topics[index].priority
-    );
-
-    printf(
-        BOLD
-        "WHY?\n"
-        RESET
-    );
-
-    if (
-        topics[index].score < 40
-    )
-    {
-        printf(
-            "- Assessment performance is very weak.\n"
-        );
-    }
-
-    else if (
-        topics[index].score < 60
-    )
-    {
-        printf(
-            "- Assessment performance is weak.\n"
-        );
-    }
-
-    else if (
-        topics[index].score < 80
-    )
-    {
-        printf(
-            "- Topic still needs improvement.\n"
-        );
-    }
-
-    else
-    {
-        printf(
-            "- Topic is already strongly understood.\n"
-        );
-    }
-
-    if (
-        topics[index].difficulty >= 4
-    )
-    {
-        printf(
-            "- This is a high-difficulty topic.\n"
-        );
-    }
-
-    int important = 0;
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        if (
-            graph[index][i]
-        )
+        if (graph[i][target] != 0)
         {
-            printf(
-                "- It is required before learning %s.\n",
-                topics[i].name
-            );
+            /*
+               A prerequisite should have reasonable knowledge.
+            */
 
-            important = 1;
+            if (topics[i].score < 60)
+                return 0;
         }
     }
 
-    printf(
-        "\nFINAL RECOMMENDATION: "
-    );
-
-    if (
-        topics[index].completed
-    )
-    {
-        printf(
-            GREEN
-            "LOW PRIORITY - MASTERED"
-            RESET
-            "\n"
-        );
-    }
-
-    else if (
-        topics[index].priority >= 70
-        ||
-        important
-    )
-    {
-        printf(
-            RED
-            "HIGH PRIORITY"
-            RESET
-            "\n"
-        );
-    }
-
-    else
-    {
-        printf(
-            YELLOW
-            "MEDIUM PRIORITY"
-            RESET
-            "\n"
-        );
-    }
-
-    waitForEnter();
-}
-
-/* ============================================================
-   NEXT PRIORITY
-   ============================================================ */
-
-int getNextPriorityIndex()
-{
-    calculatePriority();
-
-    int best = -1;
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        if (
-            !topics[i].completed
-            &&
-            (
-                best == -1
-                ||
-                topics[i].priority >
-                topics[best].priority
-            )
-        )
-        {
-            best = i;
-        }
-    }
-
-    return best;
+    return 1;
 }
 
 void showNextPriority()
 {
-    printHeader(
-        "NEXT RECOMMENDED TOPIC"
-    );
+    calculatePriority();
 
-    int best =
-        getNextPriorityIndex();
+    printHeader("NEXT RECOMMENDED TOPIC");
+
+    int best = -1;
+
+    /*
+       Select highest priority topic whose
+       direct prerequisites are ready.
+    */
+
+    for (int i = 0; i < topicCount; i++)
+    {
+        if (!topics[i].completed &&
+            prerequisitesReady(i))
+        {
+            if (best == -1 ||
+                topics[i].priority >
+                    topics[best].priority)
+            {
+                best = i;
+            }
+        }
+    }
 
     if (best == -1)
     {
-        printf(
-            GREEN
-            "\nAll Topics Mastered!\n"
-            RESET
-        );
-    }
+        printf(YELLOW
+               "\nNo topic is currently ready.\n"
+               RESET);
 
+        printf("Complete weak prerequisites first.\n");
+    }
     else
     {
-        printf(
-            "\nRecommended Topic : "
-            BOLD "%s" RESET "\n",
-            topics[best].name
-        );
+        printf("\nRecommended Topic : "
+               BOLD "%s" RESET "\n",
+               topics[best].name);
 
-        printf(
-            "Current Score     : %d%%\n",
-            topics[best].score
-        );
+        printf("Current Score     : %d%%\n",
+               topics[best].score);
 
-        printf(
-            "Priority Score    : %.2f\n",
-            topics[best].priority
-        );
+        printf("Priority Score    : %.2f\n",
+               topics[best].priority);
 
-        printf(
-            "Study Time        : %d Hours\n",
-            topics[best].requiredHours
-        );
+        printf("Study Time        : %d Hours\n",
+               topics[best].requiredHours);
     }
 
     waitForEnter();
 }
 
 /* ============================================================
-   PART 3 - RE-ASSESSMENT
+   RE-ASSESSMENT
    ============================================================ */
 
 void reassessment()
 {
-    printHeader(
-        "RE-ASSESSMENT"
-    );
+    printHeader("RE-ASSESSMENT");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "[%d] %-28s Current: %d%%\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].score
-        );
+        printf("[%d] %-28s Current: %d%%\n",
+               topics[i].id,
+               topics[i].name,
+               topics[i].score);
     }
 
     int id;
     int newScore;
 
-    printf(
-        "\nSelect Topic ID: "
-    );
-
-    scanf(
-        "%d",
-        &id
-    );
+    printf("\nSelect Topic ID: ");
+    scanf("%d", &id);
 
     int index =
         findTopicIndex(id);
 
     if (index == -1)
     {
-        printf(
-            RED
-            "Invalid Topic.\n"
-            RESET
-        );
+        printf(RED
+               "Invalid Topic.\n"
+               RESET);
 
         waitForEnter();
-
         return;
     }
 
-    printf(
-        "Enter New Assessment Score: "
-    );
+    printf("Enter New Assessment Score: ");
+    scanf("%d", &newScore);
 
-    scanf(
-        "%d",
-        &newScore
-    );
-
-    if (
-        newScore < 0
-        ||
-        newScore > 100
-    )
+    if (newScore < 0 ||
+        newScore > 100)
     {
-        printf(
-            RED
-            "Invalid Score.\n"
-            RESET
-        );
+        printf(RED
+               "Invalid Score.\n"
+               RESET);
 
         waitForEnter();
-
         return;
     }
 
@@ -1647,560 +1173,94 @@ void reassessment()
     calculatePriority();
 
     int change =
-        topics[index].score
-        -
+        topics[index].score -
         topics[index].previousScore;
 
-    printHeader(
-        "PROGRESS UPDATE"
-    );
+    printHeader("PROGRESS UPDATE");
 
-    printf(
-        "\nTopic          : %s\n",
-        topics[index].name
-    );
+    printf("\nTopic          : %s\n",
+           topics[index].name);
 
-    printf(
-        "Previous Score : %d%%\n",
-        topics[index].previousScore
-    );
+    printf("Previous Score : %d%%\n",
+           topics[index].previousScore);
 
-    printf(
-        "New Score      : %d%%\n",
-        topics[index].score
-    );
+    printf("New Score      : %d%%\n",
+           topics[index].score);
 
-    printf(
-        "Change         : %+d%%\n\n",
-        change
-    );
-
-    printf(
-        "Before : "
-    );
-
-    progressBar(
-        topics[index].previousScore
-    );
-
-    printf(
-        "\nAfter  : "
-    );
-
-    progressBar(
-        topics[index].score
-    );
-
-    printf("\n\n");
+    printf("Change         : %+d%%\n\n",
+           change);
 
     if (change > 0)
     {
-        printf(
-            GREEN
-            "Performance Improved!"
-            RESET
-            "\n"
-        );
+        printf(GREEN
+               "Performance Improved!\n"
+               RESET);
     }
-
     else if (change < 0)
     {
-        printf(
-            RED
-            "Performance Decreased."
-            RESET
-            "\n"
-        );
+        printf(RED
+               "Performance Decreased.\n"
+               RESET);
     }
-
     else
     {
-        printf(
-            YELLOW
-            "No Performance Change."
-            RESET
-            "\n"
-        );
-    }
-
-    printf(
-        "Current Status : "
-    );
-
-    printStatus(
-        topics[index].score
-    );
-
-    printf("\n");
-
-    waitForEnter();
-}
-
-/* ============================================================
-   PROGRESS COMPARISON
-   ============================================================ */
-
-void progressComparison()
-{
-    printHeader(
-        "PROGRESS COMPARISON"
-    );
-
-    printf(
-        "\n%-25s %-10s %-10s %-10s %-15s\n",
-        "TOPIC",
-        "PREVIOUS",
-        "CURRENT",
-        "CHANGE",
-        "STATUS"
-    );
-
-    printf(
-        "----------------------------------------------------------------------\n"
-    );
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        int difference =
-            topics[i].score
-            -
-            topics[i].previousScore;
-
-        printf(
-            "%-25s %-10d %-10d %+10d ",
-            topics[i].name,
-            topics[i].previousScore,
-            topics[i].score,
-            difference
-        );
-
-        if (difference > 0)
-        {
-            printf(
-                GREEN
-                "IMPROVED"
-                RESET
-            );
-        }
-
-        else if (
-            difference < 0
-        )
-        {
-            printf(
-                RED
-                "DECREASED"
-                RESET
-            );
-        }
-
-        else
-        {
-            printf(
-                YELLOW
-                "NO CHANGE"
-                RESET
-            );
-        }
-
-        printf("\n");
+        printf(YELLOW
+               "No Performance Change.\n"
+               RESET);
     }
 
     waitForEnter();
 }
 
 /* ============================================================
-   ADAPTIVE RE-PLANNING
-   ============================================================ */
-
-void adaptiveReplanning()
-{
-    printHeader(
-        "ADAPTIVE RE-PLANNING"
-    );
-
-    for (int i = 0; i < topicCount; i++)
-    {
-        printf(
-            "[%d] %-28s %d%%\n",
-            topics[i].id,
-            topics[i].name,
-            topics[i].score
-        );
-    }
-
-    int id;
-    int newScore;
-
-    printf(
-        "\nTopic Recently Studied: "
-    );
-
-    scanf(
-        "%d",
-        &id
-    );
-
-    int index =
-        findTopicIndex(id);
-
-    if (index == -1)
-    {
-        printf(
-            RED
-            "Invalid Topic.\n"
-            RESET
-        );
-
-        waitForEnter();
-
-        return;
-    }
-
-    int oldScore =
-        topics[index].score;
-
-    printf(
-        "Enter New Assessment Score: "
-    );
-
-    scanf(
-        "%d",
-        &newScore
-    );
-
-    if (
-        newScore < 0
-        ||
-        newScore > 100
-    )
-    {
-        printf(
-            RED
-            "Invalid Score.\n"
-            RESET
-        );
-
-        waitForEnter();
-
-        return;
-    }
-
-    topics[index].previousScore =
-        oldScore;
-
-    topics[index].score =
-        newScore;
-
-    calculatePriority();
-
-    printHeader(
-        "ADAPTIVE PLAN UPDATED"
-    );
-
-    printf(
-        "\nTopic       : %s\n",
-        topics[index].name
-    );
-
-    printf(
-        "Old Score   : %d%%\n",
-        oldScore
-    );
-
-    printf(
-        "New Score   : %d%%\n",
-        newScore
-    );
-
-    printf(
-        "Improvement : %+d%%\n",
-        newScore -
-        oldScore
-    );
-
-    printf(
-        "New Priority: %.2f\n",
-        topics[index].priority
-    );
-
-    printf(
-        "Status      : "
-    );
-
-    if (
-        topics[index].completed
-    )
-    {
-        printf(
-            GREEN
-            "MASTERED"
-            RESET
-            "\n"
-        );
-    }
-
-    else
-    {
-        printStatus(
-            topics[index].score
-        );
-
-        printf("\n");
-    }
-
-    int best =
-        getNextPriorityIndex();
-
-    if (best >= 0)
-    {
-        printf(
-            "\n"
-            BOLD
-            "NEW NEXT PRIORITY\n"
-            RESET
-        );
-
-        printf(
-            "%s | Score %d%% | Priority %.2f\n",
-            topics[best].name,
-            topics[best].score,
-            topics[best].priority
-        );
-    }
-
-    printf(
-        "\n"
-        BOLD
-        "UPDATED OPTIMIZED PLAN\n"
-        RESET
-    );
-
-    generateKnapsackPlan(
-        student.availableHours
-    );
-
-    waitForEnter();
-}
-
-/* ============================================================
-   WHAT-IF SIMULATOR
-   ============================================================ */
-
-void whatIfSimulator()
-{
-    printHeader(
-        "WHAT-IF STUDY SIMULATOR"
-    );
-
-    printf(
-        "\n[1] Custom Study Hours\n"
-    );
-
-    printf(
-        "[2] Compare 5 / 10 / 15 / 20 Hours\n"
-    );
-
-    int choice;
-
-    printf(
-        "\nSelect > "
-    );
-
-    scanf(
-        "%d",
-        &choice
-    );
-
-    if (choice == 1)
-    {
-        int hours;
-
-        printf(
-            "Hypothetical Study Hours: "
-        );
-
-        scanf(
-            "%d",
-            &hours
-        );
-
-        if (
-            hours <= 0
-            ||
-            hours > MAX_HOURS
-        )
-        {
-            printf(
-                RED
-                "Invalid Hours.\n"
-                RESET
-            );
-
-            waitForEnter();
-
-            return;
-        }
-
-        printHeader(
-            "WHAT-IF RESULT"
-        );
-
-        generateKnapsackPlan(
-            hours
-        );
-
-        waitForEnter();
-    }
-
-    else if (choice == 2)
-    {
-        int scenarios[] =
-            {5, 10, 15, 20};
-
-        printHeader(
-            "WHAT-IF COMPARISON"
-        );
-
-        for (int i = 0; i < 4; i++)
-        {
-            printf(
-                "\n"
-                BOLD
-                "-------------------- %d HOURS --------------------\n"
-                RESET,
-                scenarios[i]
-            );
-
-            generateKnapsackPlan(
-                scenarios[i]
-            );
-        }
-
-        waitForEnter();
-    }
-
-    else
-    {
-        printf(
-            RED
-            "Invalid Choice.\n"
-            RESET
-        );
-
-        waitForEnter();
-    }
-}
-
-/* ============================================================
-   OVERALL PROGRESS DASHBOARD
-   ONLY USED FROM MAIN MENU
+   PROGRESS DASHBOARD
    ============================================================ */
 
 void progressDashboard()
 {
     calculatePriority();
 
-    printHeader(
-        "OVERALL PROGRESS DASHBOARD"
-    );
-
-    int mastered = 0;
-
-    int weak = 0;
+    printHeader("OVERALL PROGRESS DASHBOARD");
 
     float total = 0;
+    int mastered = 0;
 
     for (int i = 0; i < topicCount; i++)
     {
-        total +=
-            topics[i].score;
+        total += topics[i].score;
 
-        if (
-            topics[i].completed
-        )
-        {
+        if (topics[i].completed)
             mastered++;
-        }
-
-        if (
-            topics[i].score < 60
-        )
-        {
-            weak++;
-        }
     }
 
     float average =
-        total /
-        topicCount;
+        total / topicCount;
 
-    float mastery =
-        (
-            (float)
-            mastered /
-            topicCount
-        )
-        *
-        100;
+    printf("\nStudent         : "
+           BOLD "%s" RESET "\n",
+           student.name);
 
-    printf(
-        "\nStudent             : "
-        BOLD "%s" RESET "\n",
-        student.name
-    );
+    printf("Average Score   : %.2f%%\n",
+           average);
 
-    printf(
-        "Average Score       : %.2f%%\n",
-        average
-    );
+    printf("Mastered Topics : %d/%d\n\n",
+           mastered,
+           topicCount);
 
-    printf(
-        "Mastered Topics     : %d/%d\n",
-        mastered,
-        topicCount
-    );
+    printf(BOLD "TOPIC PROGRESS\n" RESET);
 
-    printf(
-        "Topics Needing Work : %d\n",
-        weak
-    );
-
-    printf(
-        "Overall Mastery     : "
-    );
-
-    progressBar(
-        (int)mastery
-    );
-
-    printf(
-        "\n\n"
-        BOLD
-        "TOPIC PROGRESS\n"
-        RESET
-    );
-
-    printf(
-        "----------------------------------------------------------------------\n"
-    );
+    printf("----------------------------------------------------------------------\n");
 
     for (int i = 0; i < topicCount; i++)
     {
-        printf(
-            "%-25s ",
-            topics[i].name
-        );
+        printf("%-25s ",
+               topics[i].name);
 
-        progressBar(
-            topics[i].score
-        );
+        progressBar(topics[i].score);
 
         printf(" ");
 
-        printStatus(
-            topics[i].score
-        );
+        printStatus(topics[i].score);
 
         printf("\n");
     }
@@ -2209,148 +1269,79 @@ void progressDashboard()
 }
 
 /* ============================================================
-   PART 1 MENU
+   STUDENT ANALYSIS MENU
    ============================================================ */
 
-void part1Menu()
+void studentAnalysisMenu()
 {
     int choice;
 
     while (1)
     {
-        printHeader(
-            "PART 1 - STUDENT ANALYSIS"
-        );
+        printHeader("PART 1 - STUDENT ANALYSIS");
 
-        printf(
-            "\n[1] View Topics\n"
-        );
+        printf("\n[1] View Topics\n");
+        printf("[2] Take Assessment\n");
+        printf("[3] Assessment Dashboard\n");
+        printf("[4] Weak / Strong Analysis\n");
+        printf("[5] Priority Ranking (Merge Sort)\n");
+        printf("[6] Prerequisite Graph\n");
+        printf("[7] Dependency Risk Detector\n");
+        printf("[8] Back\n");
 
-        printf(
-            "[2] Take Assessment\n"
-        );
+        printf("\nSelect > ");
+        scanf("%d", &choice);
 
-        printf(
-            "[3] Assessment Dashboard\n"
-        );
-
-        printf(
-            "[4] Weak / Strong Analysis\n"
-        );
-
-        printf(
-            "[5] Topic Priority Analysis\n"
-        );
-
-        printf(
-            "[6] Prerequisite Graph\n"
-        );
-
-        printf(
-            "[7] Dependency Risk Detector\n"
-        );
-
-        printf(
-            "[8] Back\n"
-        );
-
-        printf(
-            "\nSelect > "
-        );
-
-        scanf(
-            "%d",
-            &choice
-        );
-
-        if (
-            (
-                choice == 3
-                ||
-                choice == 4
-                ||
-                choice == 5
-                ||
-                choice == 7
-            )
-            &&
-            !assessmentTaken
-        )
+        if ((choice >= 3 &&
+             choice <= 5 ||
+             choice == 7) &&
+            !assessmentTaken)
         {
-            printf(
-                RED
-                "\nTake Assessment First.\n"
-                RESET
-            );
+            printf(RED
+                   "\nTake Assessment First.\n"
+                   RESET);
 
             waitForEnter();
-
             continue;
         }
 
         switch (choice)
         {
             case 1:
-
                 displayTopics();
-
                 break;
-
 
             case 2:
-
                 takeAssessment();
-
                 break;
-
 
             case 3:
-
                 assessmentDashboard();
-
                 break;
-
 
             case 4:
-
                 weakStrongAnalysis();
-
                 break;
-
 
             case 5:
-
-                displayPriorities();
-
+                priorityRanking();
                 break;
-
 
             case 6:
-
                 displayPrerequisiteGraph();
-
                 break;
-
 
             case 7:
-
                 dependencyRiskDetector();
-
                 break;
-
 
             case 8:
-
                 return;
 
-
             default:
-
-                printf(
-                    RED
-                    "Invalid Choice.\n"
-                    RESET
-                );
+                printf(RED
+                       "\nInvalid Choice.\n"
+                       RESET);
 
                 waitForEnter();
         }
@@ -2358,25 +1349,20 @@ void part1Menu()
 }
 
 /* ============================================================
-   PART 2 MENU
+   PERSONALIZED PLANNER MENU
    ============================================================ */
 
-void part2Menu()
+void plannerMenu()
 {
     if (!assessmentTaken)
     {
-        printHeader(
-            "PERSONALIZED PLANNER"
-        );
+        printHeader("PERSONALIZED PLANNER");
 
-        printf(
-            RED
-            "\nComplete Part 1 Assessment First.\n"
-            RESET
-        );
+        printf(RED
+               "\nComplete Assessment First.\n"
+               RESET);
 
         waitForEnter();
-
         return;
     }
 
@@ -2384,81 +1370,42 @@ void part2Menu()
 
     while (1)
     {
-        printHeader(
-            "PART 2 - PERSONALIZED PLANNING"
-        );
+        printHeader("PART 2 - PERSONALIZED PLANNER");
 
-        printf(
-            "\n[1] Personalized Learning Path\n"
-        );
+        printf("\n[1] Personalized Learning Path\n");
+        printf("[2] Optimized Study Plan (Knapsack)\n");
+        printf("[3] Shortest Learning Route (Dijkstra)\n");
+        printf("[4] Next Recommended Topic\n");
+        printf("[5] Back\n");
 
-        printf(
-            "[2] Optimized Study Plan\n"
-        );
-
-        printf(
-            "[3] Explain Recommendation\n"
-        );
-
-        printf(
-            "[4] Next Recommended Topic\n"
-        );
-
-        printf(
-            "[5] Back\n"
-        );
-
-        printf(
-            "\nSelect > "
-        );
-
-        scanf(
-            "%d",
-            &choice
-        );
+        printf("\nSelect > ");
+        scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
-
                 personalizedLearningPath();
-
                 break;
-
 
             case 2:
-
                 optimizedStudyPlan();
-
                 break;
-
 
             case 3:
-
-                explainRecommendation();
-
+                shortestLearningRoute();
                 break;
-
 
             case 4:
-
                 showNextPriority();
-
                 break;
 
-
             case 5:
-
                 return;
 
-
             default:
-
-                printf(
-                    RED
-                    "Invalid Choice.\n"
-                    RESET
-                );
+                printf(RED
+                       "\nInvalid Choice.\n"
+                       RESET);
 
                 waitForEnter();
         }
@@ -2466,26 +1413,20 @@ void part2Menu()
 }
 
 /* ============================================================
-   PART 3 MENU
-   PROGRESS DASHBOARD REMOVED FROM HERE
+   ADAPTIVE INTELLIGENCE MENU
    ============================================================ */
 
-void part3Menu()
+void adaptiveMenu()
 {
     if (!assessmentTaken)
     {
-        printHeader(
-            "ADAPTIVE INTELLIGENCE"
-        );
+        printHeader("ADAPTIVE INTELLIGENCE");
 
-        printf(
-            RED
-            "\nComplete Part 1 Assessment First.\n"
-            RESET
-        );
+        printf(RED
+               "\nComplete Assessment First.\n"
+               RESET);
 
         waitForEnter();
-
         return;
     }
 
@@ -2493,81 +1434,37 @@ void part3Menu()
 
     while (1)
     {
-        printHeader(
-            "PART 3 - ADAPTIVE INTELLIGENCE"
-        );
+        printHeader("PART 3 - ADAPTIVE INTELLIGENCE");
 
-        printf(
-            "\n[1] Re-Assessment\n"
-        );
+        printf("\n[1] Re-Assessment\n");
+        printf("[2] View Updated Priority Ranking\n");
+        printf("[3] Generate Updated Study Plan\n");
+        printf("[4] Back\n");
 
-        printf(
-            "[2] Progress Comparison\n"
-        );
-
-        printf(
-            "[3] Adaptive Re-Planning\n"
-        );
-
-        printf(
-            "[4] What-If Study Simulator\n"
-        );
-
-        printf(
-            "[5] Back\n"
-        );
-
-        printf(
-            "\nSelect > "
-        );
-
-        scanf(
-            "%d",
-            &choice
-        );
+        printf("\nSelect > ");
+        scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
-
                 reassessment();
-
                 break;
-
 
             case 2:
-
-                progressComparison();
-
+                priorityRanking();
                 break;
-
 
             case 3:
-
-                adaptiveReplanning();
-
+                optimizedStudyPlan();
                 break;
-
 
             case 4:
-
-                whatIfSimulator();
-
-                break;
-
-
-            case 5:
-
                 return;
 
-
             default:
-
-                printf(
-                    RED
-                    "\nInvalid Choice.\n"
-                    RESET
-                );
+                printf(RED
+                       "\nInvalid Choice.\n"
+                       RESET);
 
                 waitForEnter();
         }
@@ -2581,65 +1478,41 @@ void part3Menu()
 int main()
 {
     initializeTopics();
-
     initializeGraph();
 
     enterStudentDetails();
 
     while (1)
     {
-        printHeader(
-            "PERSONALIZED LEARNING PATH PLANNER"
-        );
+        printHeader("PERSONALIZED LEARNING PATH PLANNER");
 
-        printf(
-            "\nWelcome, "
-            BOLD "%s" RESET "\n",
-            student.name
-        );
+        printf("\nWelcome, "
+               BOLD "%s" RESET "\n",
+               student.name);
 
-        printf(
-            "Study Time: %d Hours | Target Score: %d%%\n",
-            student.availableHours,
-            student.targetScore
-        );
+        printf("Study Time: %d Hours | Target Score: %d%%\n",
+               student.availableHours,
+               student.targetScore);
 
         printf("\n");
 
-        printf(
-            "        [1]  STUDENT ANALYSIS\n\n"
-        );
+        printf("        [1]  STUDENT ANALYSIS\n\n");
 
-        printf(
-            "        [2]  PERSONALIZED PLANNER\n\n"
-        );
+        printf("        [2]  PERSONALIZED PLANNER\n\n");
 
-        printf(
-            "        [3]  ADAPTIVE INTELLIGENCE\n\n"
-        );
+        printf("        [3]  ADAPTIVE INTELLIGENCE\n\n");
 
-        printf(
-            "        [4]  PROGRESS DASHBOARD\n\n"
-        );
+        printf("        [4]  PROGRESS DASHBOARD\n\n");
 
-        printf(
-            "        [5]  EXIT\n\n"
-        );
+        printf("        [5]  EXIT\n\n");
 
         printLine();
 
-        printf(
-            "Select Option > "
-        );
-
         int choice;
 
-        if (
-            scanf(
-                "%d",
-                &choice
-            ) != 1
-        )
+        printf("Select Option > ");
+
+        if (scanf("%d", &choice) != 1)
         {
             return 1;
         }
@@ -2648,38 +1521,29 @@ int main()
         {
             case 1:
 
-                part1Menu();
-
+                studentAnalysisMenu();
                 break;
-
 
             case 2:
 
-                part2Menu();
-
+                plannerMenu();
                 break;
-
 
             case 3:
 
-                part3Menu();
-
+                adaptiveMenu();
                 break;
-
 
             case 4:
 
                 if (!assessmentTaken)
                 {
-                    printf(
-                        RED
-                        "\nComplete Assessment First.\n"
-                        RESET
-                    );
+                    printf(RED
+                           "\nComplete Assessment First.\n"
+                           RESET);
 
                     waitForEnter();
                 }
-
                 else
                 {
                     progressDashboard();
@@ -2687,30 +1551,22 @@ int main()
 
                 break;
 
-
             case 5:
 
-                printHeader(
-                    "GOODBYE"
-                );
+                printHeader("GOODBYE");
 
-                printf(
-                    GREEN
-                    "\nThank you for using the "
-                    "Personalized Learning Planner.\n\n"
-                    RESET
-                );
+                printf(GREEN
+                       "\nThank you for using the "
+                       "Personalized Learning Planner.\n\n"
+                       RESET);
 
                 return 0;
 
-
             default:
 
-                printf(
-                    RED
-                    "\nInvalid Option.\n"
-                    RESET
-                );
+                printf(RED
+                       "\nInvalid Option.\n"
+                       RESET);
 
                 waitForEnter();
         }
