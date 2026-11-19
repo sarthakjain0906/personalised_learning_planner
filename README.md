@@ -1,182 +1,102 @@
 # Personalized Learning Path and Assessment Planner
 
-## Project 48
+## Project 48 – Design and Analysis of Algorithms
 
-The **Personalized Learning Path and Assessment Planner** is a C-based application that analyzes a student's performance in different topics and generates a personalized study plan.
+The **Personalized Learning Path and Assessment Planner** is a C-based application that analyzes a student's performance and generates a personalized learning plan.
 
-The system uses student assessment scores, topic difficulty, prerequisite relationships, and available study hours to recommend what the student should study next.
+The system uses assessment scores, topic difficulty, prerequisite relationships, available study hours, and algorithmic techniques to recommend what a student should study and in what order.
 
-The project also demonstrates important **Design and Analysis of Algorithms (DAA)** concepts using Merge Sort, Dijkstra's Algorithm, and 0/1 Knapsack.
+The updated implementation includes **five major DAA algorithms**:
 
----
-
-## Features
-
-The application provides the following features:
-
-- Student profile creation
-- Topic-wise assessment
-- Weak and strong topic analysis
-- Topic priority calculation
-- Priority-based topic ranking
-- Prerequisite knowledge graph
-- Dependency analysis
-- Personalized learning path generation
-- Study-time optimization
-- Shortest learning route
-- Next recommended topic
-- Re-assessment
-- Adaptive study planning
-- Overall progress dashboard
+- Merge Sort
+- Dijkstra's Algorithm
+- 0/1 Knapsack
+- Sum of Subsets using Backtracking
+- KMP String Matching
 
 ---
 
-## Algorithms Used
+## 1. Project Objective
 
-### 1. Merge Sort
+The main objective of this project is to create a personalized learning system that can:
 
-**Purpose:** Rank learning topics according to their priority.
+- Analyze student performance.
+- Identify weak and strong topics.
+- Calculate topic priority.
+- Represent prerequisite relationships using graphs.
+- Generate personalized learning paths.
+- Find minimum-cost learning routes.
+- Optimize study plans according to available study hours.
+- Find topic combinations for exact study hours.
+- Search topics efficiently.
+- Track student improvement through reassessment.
 
-Each topic receives a priority score based on the student's current score and topic difficulty.
+---
 
-The topics are then sorted from highest priority to lowest priority using Merge Sort.
+## 2. Technologies Used
 
-**Time Complexity:**
+- **Language:** C
+- **Standard:** C17 compatible
+- **Interface:** Command Line Interface (CLI)
+- **Data Structure:** Structures, Arrays and Graphs
+- **Graph Representation:** Adjacency Matrix
+- **Programming Concepts:** Recursion, Dynamic Programming, Greedy Algorithms, Backtracking and String Matching
+
+---
+
+## 3. Course Topics
+
+The current implementation contains eight learning topics:
+
+| ID | Topic | Difficulty | Required Hours |
+|---|---|---:|---:|
+| 1 | Searching | 2 | 1 |
+| 2 | Sorting | 3 | 2 |
+| 3 | Greedy Algorithm | 3 | 2 |
+| 4 | Dynamic Programming | 5 | 4 |
+| 5 | Graph Basics | 4 | 3 |
+| 6 | Dijkstra Algorithm | 4 | 3 |
+| 7 | Minimum Spanning Tree | 4 | 3 |
+| 8 | String Matching | 3 | 2 |
+
+---
+
+# 4. Algorithms Implemented
+
+## 4.1 Merge Sort – Priority Ranking
+
+Merge Sort is used to arrange topics according to their calculated priority.
+
+The priority of a topic depends on:
+
+- Student weakness – 60%
+- Topic difficulty – 40%
+
+Priority is calculated using:
+
+```text
+Weakness = 100 - Student Score
+
+Difficulty Score = Difficulty × 20
+
+Priority = 0.6 × Weakness + 0.4 × Difficulty Score
+```
+
+A topic with a higher priority should receive more attention.
+
+### Complexity
 
 ```text
 O(n log n)
 ```
 
-**Use in Project:**
-
-```text
-Student Scores
-      |
-      v
-Priority Calculation
-      |
-      v
-Merge Sort
-      |
-      v
-Priority Ranking
-```
-
 ---
 
-### 2. Dijkstra's Algorithm
+## 4.2 Dijkstra's Algorithm – Shortest Learning Route
 
-**Purpose:** Find the shortest learning route between two topics.
+The topics and their prerequisites are represented using a **weighted directed graph**.
 
-Topics are represented as vertices in a graph, while learning dependencies are represented as weighted edges.
-
-Dijkstra's Algorithm finds a minimum-cost route from the selected starting topic to the target topic.
-
-**Time Complexity:**
-
-```text
-O(V^2)
-```
-
-for the adjacency-matrix implementation used in this project.
-
-**Use in Project:**
-
-```text
-Searching
-   |
-   v
-Sorting
-   |
-   v
-Greedy Algorithm
-   |
-   v
-Dynamic Programming
-   |
-   v
-Graph Basics
-   |
-   v
-Dijkstra Algorithm
-```
-
----
-
-### 3. 0/1 Knapsack
-
-**Purpose:** Optimize the student's available study time.
-
-Each topic has:
-
-- Required study hours
-- Priority value
-
-The available study hours act as the Knapsack capacity.
-
-The algorithm selects a combination of topics that provides maximum learning priority without exceeding the available study time.
-
-**Time Complexity:**
-
-```text
-O(n * H)
-```
-
-where:
-
-```text
-n = number of topics
-H = available study hours
-```
-
-**Example:**
-
-If a student has:
-
-```text
-Available Study Time = 10 hours
-```
-
-the algorithm tries to select the best combination of topics whose total required time is at most 10 hours.
-
----
-
-## Priority Calculation
-
-Topic priority is calculated using:
-
-```text
-Weakness = 100 - Student Score
-
-Difficulty Score = Difficulty * 20
-
-Priority = 0.6 * Weakness + 0.4 * Difficulty Score
-```
-
-Therefore, topics where the student has a low score receive greater priority.
-
-Difficult topics are also given additional importance.
-
----
-
-## Knowledge Levels
-
-The application classifies student performance as:
-
-| Score | Knowledge Level |
-|---|---|
-| 80–100 | Strong |
-| 60–79 | Good |
-| 40–59 | Weak |
-| Below 40 | Very Weak |
-
-A topic with a score of **80 or above** is considered mastered.
-
----
-
-## Prerequisite Graph
-
-The project uses a graph to represent relationships between topics.
+The edge weight represents the learning effort required to move from one topic to another.
 
 Example:
 
@@ -185,8 +105,6 @@ Searching
     |
     v
 Sorting
-    |
-    +--------------------> String Matching
     |
     v
 Greedy Algorithm
@@ -198,255 +116,550 @@ Dynamic Programming
 Graph Basics
    / \
   v   v
-Dijkstra Algorithm    Minimum Spanning Tree
+Dijkstra   Minimum Spanning Tree
 ```
 
-This helps the application avoid recommending advanced topics without considering their prerequisites.
-
----
-
-## Project Structure
-
-A simple repository structure can be:
-
-```text
-personalised_learning_planner/
-│
-├── personalised_learning_planner.c
-├── README.md
-└── screenshots/
-```
-
-The main implementation is contained in:
-
-```text
-personalised_learning_planner.c
-```
-
----
-
-## Main Menu
-
-When the application starts, the user gets the following main menu:
-
-```text
-======================================================================
-                 PERSONALIZED LEARNING PATH PLANNER
-======================================================================
-
-Welcome, Student
-
-Study Time: 10 Hours | Target Score: 80%
-
-        [1]  STUDENT ANALYSIS
-
-        [2]  PERSONALIZED PLANNER
-
-        [3]  ADAPTIVE INTELLIGENCE
-
-        [4]  PROGRESS DASHBOARD
-
-        [5]  EXIT
-```
-
----
-
-## Student Analysis
-
-This section contains:
-
-```text
-1. View Topics
-2. Take Assessment
-3. Assessment Dashboard
-4. Weak / Strong Analysis
-5. Priority Ranking using Merge Sort
-6. Prerequisite Graph
-7. Dependency Risk Detector
-```
-
-The assessment scores are used to calculate the student's learning priorities.
-
----
-
-## Personalized Planner
-
-This section contains:
-
-```text
-1. Personalized Learning Path
-2. Optimized Study Plan using 0/1 Knapsack
-3. Shortest Learning Route using Dijkstra
-4. Next Recommended Topic
-```
-
-This is the main recommendation component of the application.
-
----
-
-## Adaptive Intelligence
-
-After studying a topic, the student can take another assessment.
-
-The new score is compared with the previous score.
+Dijkstra's Algorithm finds the minimum-cost learning route between a starting topic and a target topic.
 
 Example:
 
 ```text
-Previous Score : 45%
-New Score      : 70%
-Change         : +25%
+Searching
+   ->
+Sorting
+   ->
+Greedy Algorithm
+   ->
+Dynamic Programming
+   ->
+Graph Basics
+```
+
+### Complexity
+
+For the adjacency-matrix implementation:
+
+```text
+O(V²)
+```
+
+---
+
+## 4.3 0/1 Knapsack – Optimized Study Plan
+
+The 0/1 Knapsack algorithm creates an optimized study plan according to the student's available study hours.
+
+The problem is mapped as:
+
+```text
+Knapsack Capacity = Available Study Hours
+
+Item = Topic
+
+Item Weight = Required Study Hours
+
+Item Value = Topic Priority
+```
+
+The algorithm selects the combination of incomplete topics that provides the maximum learning value without exceeding the available study time.
+
+### Complexity
+
+```text
+O(n × H)
+```
+
+Where:
+
+```text
+n = number of topics
+H = available study hours
+```
+
+---
+
+## 4.4 Sum of Subsets – Backtracking
+
+The updated project includes a **Sum of Subsets Backtracking Algorithm**.
+
+It is used to generate study plans whose total required study time is exactly equal to the hours entered by the student.
+
+For every topic, the algorithm has two choices:
+
+```text
+Include Topic
+      OR
+Exclude Topic
+```
+
+If the selected topics exactly match the target study hours, the combination is displayed.
+
+Example:
+
+```text
+Target Study Time = 5 Hours
+
+Possible Plan:
+
+Sorting             = 2 Hours
+Graph Basics        = 3 Hours
+--------------------------------
+Total               = 5 Hours
+```
+
+Another possible combination could be:
+
+```text
+Searching           = 1 Hour
+Dynamic Programming = 4 Hours
+--------------------------------
+Total               = 5 Hours
+```
+
+### Backtracking Process
+
+```text
+Choose Topic
+     |
+     v
+Explore Combination
+     |
+     v
+Target reached?
+ /          \
+Yes          No
+ |            |
+Print      Backtrack
+              |
+              v
+        Try another choice
+```
+
+### Worst-Case Complexity
+
+```text
+O(2^n)
+```
+
+---
+
+## 4.5 KMP String Matching – Topic Search
+
+The **Knuth-Morris-Pratt (KMP)** algorithm is used for efficient topic searching.
+
+The student can enter a keyword and the program searches all topic names.
+
+Example:
+
+```text
+Enter Topic Keyword: Algorithm
+```
+
+Output:
+
+```text
+[3] Greedy Algorithm
+[6] Dijkstra Algorithm
+```
+
+KMP uses an **LPS (Longest Proper Prefix which is also Suffix)** array to avoid unnecessary repeated character comparisons.
+
+### Complexity
+
+```text
+O(n + m)
+```
+
+Where:
+
+```text
+n = text length
+m = pattern length
+```
+
+---
+
+# 5. Prerequisite Graph
+
+The prerequisite relationships between topics are represented using an **Adjacency Matrix**.
+
+Example:
+
+```text
+graph[0][1] = 2;
+```
+
+means:
+
+```text
+Searching -> Sorting
+Learning Cost = 2
+```
+
+Current relationships include:
+
+```text
+Searching -> Sorting
+
+Sorting -> Greedy Algorithm
+
+Greedy Algorithm -> Dynamic Programming
+
+Dynamic Programming -> Graph Basics
+
+Graph Basics -> Dijkstra Algorithm
+
+Graph Basics -> Minimum Spanning Tree
+
+Sorting -> String Matching
+```
+
+A topic on the left should normally be understood before the topic on the right.
+
+---
+
+# 6. Student Assessment
+
+The student enters an assessment score from:
+
+```text
+0 to 100
+```
+
+for every topic.
+
+The system classifies performance as:
+
+| Score | Status |
+|---:|---|
+| 80–100 | STRONG |
+| 60–79 | GOOD |
+| 40–59 | WEAK |
+| 0–39 | VERY WEAK |
+
+A topic with a score of **80 or above** is considered mastered.
+
+---
+
+# 7. Personalized Learning Path
+
+The system generates a learning path based on prerequisite relationships.
+
+Already mastered topics can be skipped.
+
+For example, suppose:
+
+```text
+Searching = 90%
+Sorting = 85%
+Greedy Algorithm = 50%
+Dynamic Programming = 40%
+Graph Basics = 30%
+```
+
+If the target is **Graph Basics**, the generated path can be:
+
+```text
+Greedy Algorithm
+       |
+       v
+Dynamic Programming
+       |
+       v
+Graph Basics
+```
+
+Searching and Sorting are not included because they are already mastered.
+
+---
+
+# 8. Next Recommended Topic
+
+The system recommends the next topic using:
+
+```text
+Topic not completed
+        +
+Prerequisites ready
+        +
+Highest priority
+```
+
+A direct prerequisite should have a score of at least:
+
+```text
+60%
+```
+
+before the dependent topic is considered ready.
+
+---
+
+# 9. Re-Assessment and Adaptive Learning
+
+Students can take a reassessment after studying a topic.
+
+The system stores:
+
+```text
+Previous Score
+New Score
+Score Change
+```
+
+Example:
+
+```text
+Previous Score : 40%
+New Score      : 75%
+Change         : +35%
 
 Performance Improved!
 ```
 
-The system recalculates topic priorities after the assessment.
+After reassessment, priorities are recalculated automatically.
 
-This allows the learning plan to change according to student progress.
+Therefore, the learning recommendations can change according to student improvement.
 
 ---
 
-## Progress Dashboard
+# 10. Main Menu
 
-The dashboard displays:
-
-- Average score
-- Number of mastered topics
-- Topic-wise progress
-- Knowledge level
-
-Example:
+The main application contains four major modules:
 
 ```text
-Searching                 [################----] 80% STRONG
-Sorting                   [############--------] 60% GOOD
-Greedy Algorithm          [########------------] 40% WEAK
-Dynamic Programming       [#####---------------] 25% VERY WEAK
+========================================================
+       PERSONALIZED LEARNING PATH PLANNER
+========================================================
+
+[1] STUDENT ANALYSIS
+
+[2] PERSONALIZED PLANNER
+
+[3] ADAPTIVE INTELLIGENCE
+
+[4] PROGRESS DASHBOARD
+
+[5] EXIT
 ```
 
 ---
 
-## Technologies Used
-
-- **Programming Language:** C
-- **Data Structures:** Arrays, Structures and Graphs
-- **Graph Representation:** Adjacency Matrix
-- **Interface:** Menu-driven Command Line Interface
-- **Algorithm Design Techniques:** Divide and Conquer, Greedy and Dynamic Programming
-
----
-
-## Compilation
-
-### GCC
-
-Compile the program using:
-
-```bash
-gcc personalised_learning_planner.c -o planner
-```
-
-Run it on Linux/macOS using:
-
-```bash
-./planner
-```
-
-On Windows:
-
-```bash
-planner.exe
-```
-
-If using VS Code, make sure GCC/MinGW is installed and available in the system PATH.
-
----
-
-## Algorithm Summary
-
-| Algorithm | Technique | Application | Complexity |
-|---|---|---|---|
-| Merge Sort | Divide and Conquer | Topic priority ranking | O(n log n) |
-| Dijkstra | Greedy / Graph | Shortest learning route | O(V²) |
-| 0/1 Knapsack | Dynamic Programming | Study-time optimization | O(n × H) |
-
----
-
-## Project Objective
-
-The main objective of this project is to develop a simple learning analytics system that can:
-
-1. Analyze student performance.
-2. Identify weak and strong topics.
-3. Understand prerequisite relationships.
-4. Prioritize topics according to learning needs.
-5. Generate a personalized learning path.
-6. Optimize limited study time.
-7. Track improvement through re-assessment.
-
----
-
-## Example Workflow
+# 11. Student Analysis Module
 
 ```text
-Create Student Profile
-        |
-        v
-Take Assessment
-        |
-        v
-Analyze Scores
-        |
-        v
-Calculate Topic Priority
-        |
-        +----------------------+
-        |                      |
-        v                      v
-   Merge Sort            Prerequisite Graph
-        |                      |
-        v                      v
-Priority Ranking       Learning Dependencies
-        |                      |
-        +-----------+----------+
-                    |
-                    v
-          Personalized Planner
-             /             \
-            v               v
-       Dijkstra         0/1 Knapsack
-            |               |
-            v               v
-     Learning Route    Optimized Study Plan
-             \             /
-              \           /
-               v         v
-              Re-Assessment
-                    |
-                    v
-              Updated Plan
+[1] View Topics
+
+[2] Take Assessment
+
+[3] Assessment Dashboard
+
+[4] Weak / Strong Analysis
+
+[5] Priority Ranking (Merge Sort)
+
+[6] Prerequisite Graph
+
+[7] Dependency Risk Detector
+
+[8] Search Topic (KMP)
+
+[9] Back
+```
+
+The **KMP Topic Search** is part of this module.
+
+---
+
+# 12. Personalized Planner Module
+
+```text
+[1] Personalized Learning Path
+
+[2] Optimized Study Plan (0/1 Knapsack)
+
+[3] Shortest Learning Route (Dijkstra)
+
+[4] Next Recommended Topic
+
+[5] Exact Study Hours (Backtracking)
+
+[6] Back
+```
+
+The new **Sum of Subsets Backtracking** algorithm is available through the Exact Study Hours option.
+
+---
+
+# 13. Adaptive Intelligence Module
+
+```text
+[1] Re-Assessment
+
+[2] View Updated Priority Ranking
+
+[3] Generate Updated Study Plan
+
+[4] Back
+```
+
+This module allows the system to update its recommendations when student performance changes.
+
+---
+
+# 14. Algorithm Summary
+
+| Algorithm | Purpose | Complexity |
+|---|---|---|
+| Merge Sort | Rank topics according to priority | O(n log n) |
+| Dijkstra | Find minimum-cost learning route | O(V²) |
+| 0/1 Knapsack | Optimize topics within available hours | O(n × H) |
+| Sum of Subsets | Find exact-hour study combinations | O(2^n) worst case |
+| KMP | Search topic names efficiently | O(n + m) |
+
+---
+
+# 15. Difference Between Optimization Algorithms
+
+### Dijkstra
+
+Answers:
+
+```text
+"What is the minimum-cost learning route
+from one topic to another?"
+```
+
+### 0/1 Knapsack
+
+Answers:
+
+```text
+"Which topics should I study to maximize
+learning value within my available hours?"
+```
+
+### Sum of Subsets
+
+Answers:
+
+```text
+"Which combinations of topics require
+exactly the number of hours I want to study?"
+```
+
+### Merge Sort
+
+Answers:
+
+```text
+"Which topics should receive the highest priority?"
+```
+
+### KMP
+
+Answers:
+
+```text
+"Which topic names contain the keyword
+I am searching for?"
 ```
 
 ---
 
-## Conclusion
+# 16. Compilation
 
-The Personalized Learning Path and Assessment Planner demonstrates how classical algorithms can be applied to a practical educational problem.
+Using GCC:
 
-Instead of using algorithms only as independent examples, this project connects them with real functions:
+```bash
+gcc main.c -o learning_planner
+```
 
-- **Merge Sort** ranks learning priorities.
-- **Dijkstra's Algorithm** finds an efficient learning route.
-- **0/1 Knapsack** optimizes limited study time.
+Run on Windows:
 
-The system continuously analyzes student performance and can update recommendations after re-assessment, making the learning plan more personalized and adaptive.
+```bash
+learning_planner.exe
+```
+
+or:
+
+```bash
+.\learning_planner.exe
+```
+
+On Linux/macOS:
+
+```bash
+./learning_planner
+```
 
 ---
 
-## Author
+# 17. Suggested Project Structure
 
-**Sarthak Jain**
+```text
+personalised_learning_planner/
+│
+├── src/
+│   └── main.c
+│
+├── README.md
+│
+└── .gitignore
+```
 
-Project: **Personalized Learning Path and Assessment Planner**
+---
 
-Language: **C**
+# 18. GitHub Update
+
+After modifying the project:
+
+```bash
+git status
+git add .
+git commit -m "Add KMP search and backtracking study planner"
+git push origin main
+```
+
+---
+
+# 19. Future Improvements
+
+The project can later be extended with additional DAA algorithms such as:
+
+- Quick Sort
+- Binary Search
+- Activity Selection
+- Prim's Algorithm
+- Kruskal's Algorithm
+- Bellman-Ford
+- Floyd-Warshall
+- Longest Common Subsequence
+- Ford-Fulkerson
+- Rabin-Karp
+
+These can be added as separate modules while keeping the existing personalized learning planner interface.
+
+---
+
+# 20. Conclusion
+
+The **Personalized Learning Path and Assessment Planner** combines multiple Design and Analysis of Algorithms concepts in a practical educational application.
+
+The system does not only analyze student scores. It also uses graph algorithms, sorting, dynamic programming, backtracking and string matching to generate personalized learning recommendations.
+
+The current implementation demonstrates five major algorithms:
+
+```text
+Merge Sort
+     +
+Dijkstra
+     +
+0/1 Knapsack
+     +
+Sum of Subsets Backtracking
+     +
+KMP String Matching
+```
+
+Together, these algorithms help the system perform **priority ranking, route planning, study-time optimization, exact-hour planning and efficient topic searching**.
