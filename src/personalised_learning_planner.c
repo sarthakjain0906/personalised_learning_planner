@@ -49,11 +49,10 @@ Student student;
 int topicCount = 8;
 int assessmentTaken = 0;
 
-/*
-   graph[i][j] = learning cost from topic i to topic j
-   0 means no direct connection.
-*/
 int graph[MAX_TOPICS][MAX_TOPICS] = {0};
+
+/* Used by Sum of Subsets */
+int solutionCount = 0;
 
 /* ============================================================
    BASIC UI
@@ -188,7 +187,7 @@ void initializeGraph()
        Graph Basics -> MST
        Sorting -> String Matching
 
-       Weight represents learning effort.
+       Weight = learning effort
     */
 
     graph[0][1] = 2;
@@ -228,11 +227,6 @@ void calculatePriority()
         int difficultyScore =
             topics[i].difficulty * 20;
 
-        /*
-           Weak topics get more priority.
-           Difficult topics also receive more priority.
-        */
-
         topics[i].priority =
             0.6f * weakness +
             0.4f * difficultyScore;
@@ -251,6 +245,7 @@ void enterStudentDetails()
     printHeader("STUDENT PROFILE");
 
     printf("\nStudent Name          : ");
+
     scanf(" %49[^\n]", student.name);
 
     do
@@ -398,7 +393,9 @@ void weakStrongAnalysis()
         }
     }
 
-    printf(YELLOW "\nTOPICS NEEDING IMPROVEMENT\n" RESET);
+    printf(YELLOW
+           "\nTOPICS NEEDING IMPROVEMENT\n"
+           RESET);
 
     for (int i = 0; i < topicCount; i++)
     {
@@ -435,11 +432,8 @@ void mergeTopics(Topic arr[],
 
     while (i <= mid && j <= right)
     {
-        /*
-           Higher priority should appear first.
-        */
-
-        if (arr[i].priority >= arr[j].priority)
+        if (arr[i].priority >=
+            arr[j].priority)
         {
             temp[k++] = arr[i++];
         }
@@ -500,7 +494,9 @@ void priorityRanking()
                     0,
                     topicCount - 1);
 
-    printHeader("TOPIC PRIORITY RANKING - MERGE SORT");
+    printHeader(
+        "TOPIC PRIORITY RANKING - MERGE SORT"
+    );
 
     printf("\n%-6s %-28s %-10s %-12s\n",
            "RANK",
@@ -531,7 +527,9 @@ void priorityRanking()
 
 void displayPrerequisiteGraph()
 {
-    printHeader("PREREQUISITE KNOWLEDGE GRAPH");
+    printHeader(
+        "PREREQUISITE KNOWLEDGE GRAPH"
+    );
 
     printf("\n");
 
@@ -541,15 +539,20 @@ void displayPrerequisiteGraph()
         {
             if (graph[i][j] != 0)
             {
-                printf("%-28s ---> %-28s Cost: %d\n",
-                       topics[i].name,
-                       topics[j].name,
-                       graph[i][j]);
+                printf(
+                    "%-28s ---> %-28s Cost: %d\n",
+                    topics[i].name,
+                    topics[j].name,
+                    graph[i][j]
+                );
             }
         }
     }
 
-    printf("\nA ---> B means A should be understood before B.\n");
+    printf(
+        "\nA ---> B means A should be "
+        "understood before B.\n"
+    );
 
     waitForEnter();
 }
@@ -603,7 +606,9 @@ void dependencyRiskDetector()
 
     if (target == -1)
     {
-        printf(RED "\nInvalid Topic ID.\n" RESET);
+        printf(RED
+               "\nInvalid Topic ID.\n"
+               RESET);
 
         waitForEnter();
         return;
@@ -655,8 +660,10 @@ void printDijkstraPath(int parent[],
         return;
     }
 
-    printDijkstraPath(parent,
-                      parent[target]);
+    printDijkstraPath(
+        parent,
+        parent[target]
+    );
 
     printf(" -> %s",
            topics[target].name);
@@ -664,7 +671,9 @@ void printDijkstraPath(int parent[],
 
 void shortestLearningRoute()
 {
-    printHeader("SHORTEST LEARNING ROUTE - DIJKSTRA");
+    printHeader(
+        "SHORTEST LEARNING ROUTE - DIJKSTRA"
+    );
 
     printf("\nAvailable Topics:\n\n");
 
@@ -717,8 +726,10 @@ void shortestLearningRoute()
          count++)
     {
         int u =
-            minimumDistance(distance,
-                            visited);
+            minimumDistance(
+                distance,
+                visited
+            );
 
         if (u == -1)
             break;
@@ -732,8 +743,8 @@ void shortestLearningRoute()
             if (!visited[v] &&
                 graph[u][v] != 0 &&
                 distance[u] != INF &&
-                distance[u] + graph[u][v] <
-                    distance[v])
+                distance[u] + graph[u][v]
+                    < distance[v])
             {
                 distance[v] =
                     distance[u] +
@@ -749,7 +760,8 @@ void shortestLearningRoute()
     if (distance[target] == INF)
     {
         printf(RED
-               "No learning route exists between these topics.\n"
+               "No learning route exists "
+               "between these topics.\n"
                RESET);
     }
     else
@@ -758,14 +770,23 @@ void shortestLearningRoute()
                "Recommended Learning Route:\n\n"
                RESET);
 
-        printDijkstraPath(parent,
-                          target);
+        printDijkstraPath(
+            parent,
+            target
+        );
 
-        printf("\n\nTotal Learning Cost : %d\n",
-               distance[target]);
+        printf(
+            "\n\nTotal Learning Cost : %d\n",
+            distance[target]
+        );
 
-        printf("Algorithm Used      : Dijkstra\n");
-        printf("Complexity          : O(V^2)\n");
+        printf(
+            "Algorithm Used      : Dijkstra\n"
+        );
+
+        printf(
+            "Complexity          : O(V^2)\n"
+        );
     }
 
     waitForEnter();
@@ -785,10 +806,12 @@ void buildLearningPath(int target,
         if (graph[i][target] != 0 &&
             !visited[i])
         {
-            buildLearningPath(i,
-                              visited,
-                              path,
-                              count);
+            buildLearningPath(
+                i,
+                visited,
+                path,
+                count
+            );
         }
     }
 
@@ -808,7 +831,9 @@ void personalizedLearningPath()
 {
     calculatePriority();
 
-    printHeader("PERSONALIZED LEARNING PATH");
+    printHeader(
+        "PERSONALIZED LEARNING PATH"
+    );
 
     for (int i = 0; i < topicCount; i++)
     {
@@ -820,7 +845,10 @@ void personalizedLearningPath()
 
     int id;
 
-    printf("\nSelect Final Target Topic: ");
+    printf(
+        "\nSelect Final Target Topic: "
+    );
+
     scanf("%d", &id);
 
     int target =
@@ -838,15 +866,18 @@ void personalizedLearningPath()
 
     int visited[MAX_TOPICS] = {0};
     int path[MAX_TOPICS];
-
     int count = 0;
 
-    buildLearningPath(target,
-                      visited,
-                      path,
-                      &count);
+    buildLearningPath(
+        target,
+        visited,
+        path,
+        &count
+    );
 
-    printHeader("YOUR PERSONALIZED LEARNING PATH");
+    printHeader(
+        "YOUR PERSONALIZED LEARNING PATH"
+    );
 
     printf("\nStudent : %s\n",
            student.name);
@@ -856,9 +887,12 @@ void personalizedLearningPath()
 
     if (count == 0)
     {
-        printf(GREEN
-               "Target and prerequisites are already mastered.\n"
-               RESET);
+        printf(
+            GREEN
+            "Target and prerequisites are "
+            "already mastered.\n"
+            RESET
+        );
     }
     else
     {
@@ -870,9 +904,12 @@ void personalizedLearningPath()
                    i + 1,
                    topics[index].name);
 
-            printf(" | Score: %d%% | Priority: %.2f\n",
-                   topics[index].score,
-                   topics[index].priority);
+            printf(
+                " | Score: %d%% | "
+                "Priority: %.2f\n",
+                topics[index].score,
+                topics[index].priority
+            );
 
             if (i < count - 1)
             {
@@ -890,8 +927,7 @@ void personalizedLearningPath()
    0/1 KNAPSACK STUDY OPTIMIZER
    ============================================================ */
 
-int maxValue(int a,
-             int b)
+int maxValue(int a, int b)
 {
     return (a > b) ? a : b;
 }
@@ -900,7 +936,9 @@ void optimizedStudyPlan()
 {
     calculatePriority();
 
-    printHeader("OPTIMIZED STUDY PLAN - 0/1 KNAPSACK");
+    printHeader(
+        "OPTIMIZED STUDY PLAN - 0/1 KNAPSACK"
+    );
 
     int candidates[MAX_TOPICS];
     int candidateCount = 0;
@@ -929,9 +967,7 @@ void optimizedStudyPlan()
     int dp[MAX_TOPICS + 1]
           [MAX_HOURS + 1];
 
-    memset(dp,
-           0,
-           sizeof(dp));
+    memset(dp, 0, sizeof(dp));
 
     for (int i = 1;
          i <= candidateCount;
@@ -958,7 +994,8 @@ void optimizedStudyPlan()
 
                         value +
                         dp[i - 1]
-                          [h - required]);
+                          [h - required]
+                    );
             }
             else
             {
@@ -992,15 +1029,19 @@ void optimizedStudyPlan()
         }
     }
 
-    printf("\nAvailable Study Time : %d Hours\n\n",
-           hours);
+    printf(
+        "\nAvailable Study Time : %d Hours\n\n",
+        hours
+    );
 
     printf("%-28s %-10s %-12s\n",
            "TOPIC",
            "HOURS",
            "PRIORITY");
 
-    printf("--------------------------------------------------------------------\n");
+    printf(
+        "--------------------------------------------------------------------\n"
+    );
 
     int usedHours = 0;
 
@@ -1011,16 +1052,20 @@ void optimizedStudyPlan()
         int index =
             selected[i];
 
-        printf("%-28s %-10d %-12.2f\n",
-               topics[index].name,
-               topics[index].requiredHours,
-               topics[index].priority);
+        printf(
+            "%-28s %-10d %-12.2f\n",
+            topics[index].name,
+            topics[index].requiredHours,
+            topics[index].priority
+        );
 
         usedHours +=
             topics[index].requiredHours;
     }
 
-    printf("--------------------------------------------------------------------\n");
+    printf(
+        "--------------------------------------------------------------------\n"
+    );
 
     printf("Hours Used      : %d/%d\n",
            usedHours,
@@ -1029,12 +1074,18 @@ void optimizedStudyPlan()
     printf("Unused Hours    : %d\n",
            hours - usedHours);
 
-    printf("Learning Value  : %d\n",
-           dp[candidateCount][hours]);
+    printf(
+        "Learning Value  : %d\n",
+        dp[candidateCount][hours]
+    );
 
-    printf("\nAlgorithm Used  : 0/1 Knapsack\n");
+    printf(
+        "\nAlgorithm Used  : 0/1 Knapsack\n"
+    );
 
-    printf("Time Complexity : O(n * H)\n");
+    printf(
+        "Time Complexity : O(n * H)\n"
+    );
 
     waitForEnter();
 }
@@ -1049,10 +1100,6 @@ int prerequisitesReady(int target)
     {
         if (graph[i][target] != 0)
         {
-            /*
-               A prerequisite should have reasonable knowledge.
-            */
-
             if (topics[i].score < 60)
                 return 0;
         }
@@ -1065,14 +1112,11 @@ void showNextPriority()
 {
     calculatePriority();
 
-    printHeader("NEXT RECOMMENDED TOPIC");
+    printHeader(
+        "NEXT RECOMMENDED TOPIC"
+    );
 
     int best = -1;
-
-    /*
-       Select highest priority topic whose
-       direct prerequisites are ready.
-    */
 
     for (int i = 0; i < topicCount; i++)
     {
@@ -1081,7 +1125,7 @@ void showNextPriority()
         {
             if (best == -1 ||
                 topics[i].priority >
-                    topics[best].priority)
+                topics[best].priority)
             {
                 best = i;
             }
@@ -1090,27 +1134,412 @@ void showNextPriority()
 
     if (best == -1)
     {
-        printf(YELLOW
-               "\nNo topic is currently ready.\n"
-               RESET);
+        printf(
+            YELLOW
+            "\nNo topic is currently ready.\n"
+            RESET
+        );
 
-        printf("Complete weak prerequisites first.\n");
+        printf(
+            "Complete weak prerequisites first.\n"
+        );
     }
     else
     {
-        printf("\nRecommended Topic : "
-               BOLD "%s" RESET "\n",
-               topics[best].name);
+        printf(
+            "\nRecommended Topic : "
+            BOLD "%s" RESET "\n",
+            topics[best].name
+        );
 
-        printf("Current Score     : %d%%\n",
-               topics[best].score);
+        printf(
+            "Current Score     : %d%%\n",
+            topics[best].score
+        );
 
-        printf("Priority Score    : %.2f\n",
-               topics[best].priority);
+        printf(
+            "Priority Score    : %.2f\n",
+            topics[best].priority
+        );
 
-        printf("Study Time        : %d Hours\n",
-               topics[best].requiredHours);
+        printf(
+            "Study Time        : %d Hours\n",
+            topics[best].requiredHours
+        );
     }
+
+    waitForEnter();
+}
+
+/* ============================================================
+   ALGORITHM 4
+   KMP STRING MATCHING
+   ============================================================ */
+
+/*
+   LPS = Longest Proper Prefix
+         which is also a Suffix.
+
+   This table helps KMP avoid
+   unnecessary repeated comparisons.
+*/
+
+void buildLPS(const char pattern[],
+              int lps[])
+{
+    int length = 0;
+    int i = 1;
+
+    lps[0] = 0;
+
+    while (pattern[i] != '\0')
+    {
+        if (pattern[i] ==
+            pattern[length])
+        {
+            length++;
+
+            lps[i] = length;
+
+            i++;
+        }
+        else
+        {
+            if (length != 0)
+            {
+                length =
+                    lps[length - 1];
+            }
+            else
+            {
+                lps[i] = 0;
+
+                i++;
+            }
+        }
+    }
+}
+
+/*
+   Returns 1 if pattern occurs
+   anywhere inside text.
+*/
+
+int KMPSearch(const char text[],
+              const char pattern[])
+{
+    if (pattern[0] == '\0')
+        return 0;
+
+    int lps[50];
+
+    buildLPS(pattern, lps);
+
+    int i = 0;
+    int j = 0;
+
+    while (text[i] != '\0')
+    {
+        if (text[i] == pattern[j])
+        {
+            i++;
+            j++;
+
+            if (pattern[j] == '\0')
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            if (j != 0)
+            {
+                j =
+                    lps[j - 1];
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+
+    return 0;
+}
+
+void searchTopicKMP()
+{
+    printHeader(
+        "TOPIC SEARCH - KMP"
+    );
+
+    char pattern[50];
+
+    printf(
+        "\nEnter Topic Keyword: "
+    );
+
+    scanf(" %49[^\n]", pattern);
+
+    int found = 0;
+
+    printf(
+        "\nMatching Topics:\n\n"
+    );
+
+    for (int i = 0;
+         i < topicCount;
+         i++)
+    {
+        if (KMPSearch(
+                topics[i].name,
+                pattern))
+        {
+            printf(
+                "[%d] %-28s\n",
+                topics[i].id,
+                topics[i].name
+            );
+
+            found = 1;
+        }
+    }
+
+    if (!found)
+    {
+        printf(
+            YELLOW
+            "No matching topic found.\n"
+            RESET
+        );
+    }
+
+    printf(
+        "\nAlgorithm Used  : "
+        "KMP String Matching\n"
+    );
+
+    printf(
+        "Time Complexity : O(n + m)\n"
+    );
+
+    waitForEnter();
+}
+
+/* ============================================================
+   ALGORITHM 5
+   SUM OF SUBSETS USING BACKTRACKING
+   ============================================================ */
+
+/*
+   Find combinations of topics whose
+   required study hours exactly equal
+   the target study hours.
+
+   At every topic we have two choices:
+
+   1. Include topic
+   2. Exclude topic
+*/
+
+void findStudyCombinations(
+    int index,
+    int currentSum,
+    int target,
+    int selected[])
+{
+    /*
+       Exact target achieved.
+    */
+
+    if (currentSum == target)
+    {
+        solutionCount++;
+
+        printf(
+            "\nPlan %d:\n",
+            solutionCount
+        );
+
+        int totalHours = 0;
+
+        for (int i = 0;
+             i < topicCount;
+             i++)
+        {
+            if (selected[i])
+            {
+                printf(
+                    "  %-28s %d Hours\n",
+                    topics[i].name,
+                    topics[i].requiredHours
+                );
+
+                totalHours +=
+                    topics[i].requiredHours;
+            }
+        }
+
+        printf(
+            "  Total Study Time: %d Hours\n",
+            totalHours
+        );
+
+        return;
+    }
+
+    /*
+       Pruning:
+       Stop when no topics remain
+       or target is exceeded.
+    */
+
+    if (index >= topicCount ||
+        currentSum > target)
+    {
+        return;
+    }
+
+    /* ---------- INCLUDE ---------- */
+
+    selected[index] = 1;
+
+    findStudyCombinations(
+        index + 1,
+
+        currentSum +
+            topics[index].requiredHours,
+
+        target,
+
+        selected
+    );
+
+    /* ---------- BACKTRACK ---------- */
+
+    selected[index] = 0;
+
+    /* ---------- EXCLUDE ---------- */
+
+    findStudyCombinations(
+        index + 1,
+        currentSum,
+        target,
+        selected
+    );
+}
+
+void exactStudyHoursPlanner()
+{
+    printHeader(
+        "EXACT STUDY HOURS - BACKTRACKING"
+    );
+
+    printf(
+        "\nAvailable Study Time: %d Hours\n",
+        student.availableHours
+    );
+
+    printf(
+        "\n%-5s %-28s %-10s\n",
+        "ID",
+        "TOPIC",
+        "HOURS"
+    );
+
+    printf(
+        "--------------------------------------------------\n"
+    );
+
+    for (int i = 0;
+         i < topicCount;
+         i++)
+    {
+        printf(
+            "%-5d %-28s %-10d\n",
+            topics[i].id,
+            topics[i].name,
+            topics[i].requiredHours
+        );
+    }
+
+    int target;
+
+    printf(
+        "\nEnter Exact Study Hours: "
+    );
+
+    scanf("%d", &target);
+
+    if (target <= 0)
+    {
+        printf(
+            RED
+            "\nStudy hours must be greater than 0.\n"
+            RESET
+        );
+
+        waitForEnter();
+        return;
+    }
+
+    if (target >
+        student.availableHours)
+    {
+        printf(
+            RED
+            "\nYou only have %d available hours.\n"
+            RESET,
+            student.availableHours
+        );
+
+        waitForEnter();
+        return;
+    }
+
+    int selected[MAX_TOPICS] = {0};
+
+    solutionCount = 0;
+
+    printf(
+        "\nPossible Study Plans "
+        "for Exactly %d Hours:\n",
+        target
+    );
+
+    findStudyCombinations(
+        0,
+        0,
+        target,
+        selected
+    );
+
+    if (solutionCount == 0)
+    {
+        printf(
+            YELLOW
+            "\nNo exact combination found.\n"
+            RESET
+        );
+    }
+    else
+    {
+        printf(
+            GREEN
+            "\nTotal Possible Plans: %d\n"
+            RESET,
+            solutionCount
+        );
+    }
+
+    printf(
+        "\nAlgorithm Used   : "
+        "Sum of Subsets Backtracking\n"
+    );
+
+    printf(
+        "Worst Complexity : O(2^n)\n"
+    );
 
     waitForEnter();
 }
@@ -1123,12 +1552,16 @@ void reassessment()
 {
     printHeader("RE-ASSESSMENT");
 
-    for (int i = 0; i < topicCount; i++)
+    for (int i = 0;
+         i < topicCount;
+         i++)
     {
-        printf("[%d] %-28s Current: %d%%\n",
-               topics[i].id,
-               topics[i].name,
-               topics[i].score);
+        printf(
+            "[%d] %-28s Current: %d%%\n",
+            topics[i].id,
+            topics[i].name,
+            topics[i].score
+        );
     }
 
     int id;
@@ -1142,23 +1575,30 @@ void reassessment()
 
     if (index == -1)
     {
-        printf(RED
-               "Invalid Topic.\n"
-               RESET);
+        printf(
+            RED
+            "Invalid Topic.\n"
+            RESET
+        );
 
         waitForEnter();
         return;
     }
 
-    printf("Enter New Assessment Score: ");
+    printf(
+        "Enter New Assessment Score: "
+    );
+
     scanf("%d", &newScore);
 
     if (newScore < 0 ||
         newScore > 100)
     {
-        printf(RED
-               "Invalid Score.\n"
-               RESET);
+        printf(
+            RED
+            "Invalid Score.\n"
+            RESET
+        );
 
         waitForEnter();
         return;
@@ -1178,35 +1618,49 @@ void reassessment()
 
     printHeader("PROGRESS UPDATE");
 
-    printf("\nTopic          : %s\n",
-           topics[index].name);
+    printf(
+        "\nTopic          : %s\n",
+        topics[index].name
+    );
 
-    printf("Previous Score : %d%%\n",
-           topics[index].previousScore);
+    printf(
+        "Previous Score : %d%%\n",
+        topics[index].previousScore
+    );
 
-    printf("New Score      : %d%%\n",
-           topics[index].score);
+    printf(
+        "New Score      : %d%%\n",
+        topics[index].score
+    );
 
-    printf("Change         : %+d%%\n\n",
-           change);
+    printf(
+        "Change         : %+d%%\n\n",
+        change
+    );
 
     if (change > 0)
     {
-        printf(GREEN
-               "Performance Improved!\n"
-               RESET);
+        printf(
+            GREEN
+            "Performance Improved!\n"
+            RESET
+        );
     }
     else if (change < 0)
     {
-        printf(RED
-               "Performance Decreased.\n"
-               RESET);
+        printf(
+            RED
+            "Performance Decreased.\n"
+            RESET
+        );
     }
     else
     {
-        printf(YELLOW
-               "No Performance Change.\n"
-               RESET);
+        printf(
+            YELLOW
+            "No Performance Change.\n"
+            RESET
+        );
     }
 
     waitForEnter();
@@ -1220,12 +1674,16 @@ void progressDashboard()
 {
     calculatePriority();
 
-    printHeader("OVERALL PROGRESS DASHBOARD");
+    printHeader(
+        "OVERALL PROGRESS DASHBOARD"
+    );
 
     float total = 0;
     int mastered = 0;
 
-    for (int i = 0; i < topicCount; i++)
+    for (int i = 0;
+         i < topicCount;
+         i++)
     {
         total += topics[i].score;
 
@@ -1236,31 +1694,51 @@ void progressDashboard()
     float average =
         total / topicCount;
 
-    printf("\nStudent         : "
-           BOLD "%s" RESET "\n",
-           student.name);
+    printf(
+        "\nStudent         : "
+        BOLD "%s" RESET "\n",
+        student.name
+    );
 
-    printf("Average Score   : %.2f%%\n",
-           average);
+    printf(
+        "Average Score   : %.2f%%\n",
+        average
+    );
 
-    printf("Mastered Topics : %d/%d\n\n",
-           mastered,
-           topicCount);
+    printf(
+        "Mastered Topics : %d/%d\n\n",
+        mastered,
+        topicCount
+    );
 
-    printf(BOLD "TOPIC PROGRESS\n" RESET);
+    printf(
+        BOLD
+        "TOPIC PROGRESS\n"
+        RESET
+    );
 
-    printf("----------------------------------------------------------------------\n");
+    printf(
+        "----------------------------------------------------------------------\n"
+    );
 
-    for (int i = 0; i < topicCount; i++)
+    for (int i = 0;
+         i < topicCount;
+         i++)
     {
-        printf("%-25s ",
-               topics[i].name);
+        printf(
+            "%-25s ",
+            topics[i].name
+        );
 
-        progressBar(topics[i].score);
+        progressBar(
+            topics[i].score
+        );
 
         printf(" ");
 
-        printStatus(topics[i].score);
+        printStatus(
+            topics[i].score
+        );
 
         printf("\n");
     }
@@ -1278,7 +1756,9 @@ void studentAnalysisMenu()
 
     while (1)
     {
-        printHeader("PART 1 - STUDENT ANALYSIS");
+        printHeader(
+            "PART 1 - STUDENT ANALYSIS"
+        );
 
         printf("\n[1] View Topics\n");
         printf("[2] Take Assessment\n");
@@ -1287,19 +1767,30 @@ void studentAnalysisMenu()
         printf("[5] Priority Ranking (Merge Sort)\n");
         printf("[6] Prerequisite Graph\n");
         printf("[7] Dependency Risk Detector\n");
-        printf("[8] Back\n");
+
+        /* NEW */
+        printf("[8] Search Topic (KMP)\n");
+
+        printf("[9] Back\n");
 
         printf("\nSelect > ");
         scanf("%d", &choice);
 
-        if ((choice >= 3 &&
-             choice <= 5 ||
-             choice == 7) &&
+        /*
+           Options 3,4,5,7 require
+           assessment data.
+        */
+
+        if ((((choice >= 3 &&
+               choice <= 5) ||
+              choice == 7)) &&
             !assessmentTaken)
         {
-            printf(RED
-                   "\nTake Assessment First.\n"
-                   RESET);
+            printf(
+                RED
+                "\nTake Assessment First.\n"
+                RESET
+            );
 
             waitForEnter();
             continue;
@@ -1308,40 +1799,58 @@ void studentAnalysisMenu()
         switch (choice)
         {
             case 1:
+
                 displayTopics();
                 break;
 
             case 2:
+
                 takeAssessment();
                 break;
 
             case 3:
+
                 assessmentDashboard();
                 break;
 
             case 4:
+
                 weakStrongAnalysis();
                 break;
 
             case 5:
+
                 priorityRanking();
                 break;
 
             case 6:
+
                 displayPrerequisiteGraph();
                 break;
 
             case 7:
+
                 dependencyRiskDetector();
                 break;
 
             case 8:
+
+                /* KMP */
+
+                searchTopicKMP();
+                break;
+
+            case 9:
+
                 return;
 
             default:
-                printf(RED
-                       "\nInvalid Choice.\n"
-                       RESET);
+
+                printf(
+                    RED
+                    "\nInvalid Choice.\n"
+                    RESET
+                );
 
                 waitForEnter();
         }
@@ -1356,13 +1865,18 @@ void plannerMenu()
 {
     if (!assessmentTaken)
     {
-        printHeader("PERSONALIZED PLANNER");
+        printHeader(
+            "PERSONALIZED PLANNER"
+        );
 
-        printf(RED
-               "\nComplete Assessment First.\n"
-               RESET);
+        printf(
+            RED
+            "\nComplete Assessment First.\n"
+            RESET
+        );
 
         waitForEnter();
+
         return;
     }
 
@@ -1370,42 +1884,84 @@ void plannerMenu()
 
     while (1)
     {
-        printHeader("PART 2 - PERSONALIZED PLANNER");
+        printHeader(
+            "PART 2 - PERSONALIZED PLANNER"
+        );
 
-        printf("\n[1] Personalized Learning Path\n");
-        printf("[2] Optimized Study Plan (Knapsack)\n");
-        printf("[3] Shortest Learning Route (Dijkstra)\n");
-        printf("[4] Next Recommended Topic\n");
-        printf("[5] Back\n");
+        printf(
+            "\n[1] Personalized Learning Path\n"
+        );
+
+        printf(
+            "[2] Optimized Study Plan "
+            "(Knapsack)\n"
+        );
+
+        printf(
+            "[3] Shortest Learning Route "
+            "(Dijkstra)\n"
+        );
+
+        printf(
+            "[4] Next Recommended Topic\n"
+        );
+
+        /* NEW BACKTRACKING OPTION */
+
+        printf(
+            "[5] Exact Study Hours "
+            "(Backtracking)\n"
+        );
+
+        printf("[6] Back\n");
 
         printf("\nSelect > ");
+
         scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
+
                 personalizedLearningPath();
                 break;
 
             case 2:
+
                 optimizedStudyPlan();
                 break;
 
             case 3:
+
                 shortestLearningRoute();
                 break;
 
             case 4:
+
                 showNextPriority();
                 break;
 
             case 5:
+
+                /*
+                   Sum of Subsets
+                   Backtracking
+                */
+
+                exactStudyHoursPlanner();
+                break;
+
+            case 6:
+
                 return;
 
             default:
-                printf(RED
-                       "\nInvalid Choice.\n"
-                       RESET);
+
+                printf(
+                    RED
+                    "\nInvalid Choice.\n"
+                    RESET
+                );
 
                 waitForEnter();
         }
@@ -1420,13 +1976,18 @@ void adaptiveMenu()
 {
     if (!assessmentTaken)
     {
-        printHeader("ADAPTIVE INTELLIGENCE");
+        printHeader(
+            "ADAPTIVE INTELLIGENCE"
+        );
 
-        printf(RED
-               "\nComplete Assessment First.\n"
-               RESET);
+        printf(
+            RED
+            "\nComplete Assessment First.\n"
+            RESET
+        );
 
         waitForEnter();
+
         return;
     }
 
@@ -1434,37 +1995,56 @@ void adaptiveMenu()
 
     while (1)
     {
-        printHeader("PART 3 - ADAPTIVE INTELLIGENCE");
+        printHeader(
+            "PART 3 - ADAPTIVE INTELLIGENCE"
+        );
 
-        printf("\n[1] Re-Assessment\n");
-        printf("[2] View Updated Priority Ranking\n");
-        printf("[3] Generate Updated Study Plan\n");
+        printf(
+            "\n[1] Re-Assessment\n"
+        );
+
+        printf(
+            "[2] View Updated Priority Ranking\n"
+        );
+
+        printf(
+            "[3] Generate Updated Study Plan\n"
+        );
+
         printf("[4] Back\n");
 
         printf("\nSelect > ");
+
         scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
+
                 reassessment();
                 break;
 
             case 2:
+
                 priorityRanking();
                 break;
 
             case 3:
+
                 optimizedStudyPlan();
                 break;
 
             case 4:
+
                 return;
 
             default:
-                printf(RED
-                       "\nInvalid Choice.\n"
-                       RESET);
+
+                printf(
+                    RED
+                    "\nInvalid Choice.\n"
+                    RESET
+                );
 
                 waitForEnter();
         }
@@ -1477,34 +2057,72 @@ void adaptiveMenu()
 
 int main()
 {
+    /*
+       Step 1:
+       Initialize course information.
+    */
+
     initializeTopics();
+
+    /*
+       Step 2:
+       Create prerequisite graph.
+    */
+
     initializeGraph();
+
+    /*
+       Step 3:
+       Create student profile.
+    */
 
     enterStudentDetails();
 
+    /*
+       Step 4:
+       Main application menu.
+    */
+
     while (1)
     {
-        printHeader("PERSONALIZED LEARNING PATH PLANNER");
+        printHeader(
+            "PERSONALIZED LEARNING PATH PLANNER"
+        );
 
-        printf("\nWelcome, "
-               BOLD "%s" RESET "\n",
-               student.name);
+        printf(
+            "\nWelcome, "
+            BOLD "%s" RESET "\n",
+            student.name
+        );
 
-        printf("Study Time: %d Hours | Target Score: %d%%\n",
-               student.availableHours,
-               student.targetScore);
+        printf(
+            "Study Time: %d Hours | "
+            "Target Score: %d%%\n",
+            student.availableHours,
+            student.targetScore
+        );
 
         printf("\n");
 
-        printf("        [1]  STUDENT ANALYSIS\n\n");
+        printf(
+            "        [1]  STUDENT ANALYSIS\n\n"
+        );
 
-        printf("        [2]  PERSONALIZED PLANNER\n\n");
+        printf(
+            "        [2]  PERSONALIZED PLANNER\n\n"
+        );
 
-        printf("        [3]  ADAPTIVE INTELLIGENCE\n\n");
+        printf(
+            "        [3]  ADAPTIVE INTELLIGENCE\n\n"
+        );
 
-        printf("        [4]  PROGRESS DASHBOARD\n\n");
+        printf(
+            "        [4]  PROGRESS DASHBOARD\n\n"
+        );
 
-        printf("        [5]  EXIT\n\n");
+        printf(
+            "        [5]  EXIT\n\n"
+        );
 
         printLine();
 
@@ -1538,9 +2156,11 @@ int main()
 
                 if (!assessmentTaken)
                 {
-                    printf(RED
-                           "\nComplete Assessment First.\n"
-                           RESET);
+                    printf(
+                        RED
+                        "\nComplete Assessment First.\n"
+                        RESET
+                    );
 
                     waitForEnter();
                 }
@@ -1555,18 +2175,22 @@ int main()
 
                 printHeader("GOODBYE");
 
-                printf(GREEN
-                       "\nThank you for using the "
-                       "Personalized Learning Planner.\n\n"
-                       RESET);
+                printf(
+                    GREEN
+                    "\nThank you for using the "
+                    "Personalized Learning Planner.\n\n"
+                    RESET
+                );
 
                 return 0;
 
             default:
 
-                printf(RED
-                       "\nInvalid Option.\n"
-                       RESET);
+                printf(
+                    RED
+                    "\nInvalid Option.\n"
+                    RESET
+                );
 
                 waitForEnter();
         }
